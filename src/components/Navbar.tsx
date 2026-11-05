@@ -4,26 +4,25 @@ import { DEFAULT_GOALS, MonthlyGoals } from '../types';
 import {
   Activity,
   Award,
-  Bell,
+  Calendar,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Dumbbell,
-  FileSpreadsheet,
   Flame,
   LogOut,
   Plus,
   Settings,
-  User as UserIcon,
   Users,
 } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'dashboard' | 'ranking' | 'spreadsheet';
-  setActiveTab: (tab: 'dashboard' | 'ranking' | 'spreadsheet') => void;
+  activeTab: 'dashboard' | 'ranking';
+  setActiveTab: (tab: 'dashboard' | 'ranking') => void;
   openNewActivityModal: () => void;
   openFriendsModal: () => void;
   openGoalsModal: () => void;
-  openSpreadsheetModal: () => void;
   openVerifyEmailModal: () => void;
   selectedMonth: number;
   setSelectedMonth: (month: number) => void;
@@ -53,7 +52,6 @@ export default function Navbar({
   openNewActivityModal,
   openFriendsModal,
   openGoalsModal,
-  openSpreadsheetModal,
   openVerifyEmailModal,
   selectedMonth,
   setSelectedMonth,
@@ -64,10 +62,28 @@ export default function Navbar({
   const { user, profile, logout, activeUserGoals } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
   return (
     <header className="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-30 shadow-lg">
       {/* Email Unverified Warning Alert Banner */}
-      {user && user.emailVerified === false && (
+      {user && user.emailVerified === false && !user.uid.startsWith('guest_') && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 py-1.5 px-3 sm:px-4 text-[11px] sm:text-xs text-amber-200 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 truncate">
             <span className="text-amber-400 font-bold shrink-0">⚠️ Pendente:</span>
@@ -82,7 +98,7 @@ export default function Navbar({
         </div>
       )}
 
-      {/* Top Banner: META MENSAL (Faithful to spreadsheet header, touch-friendly scroll on mobile) */}
+      {/* Top Banner: META MENSAL */}
       <div className="bg-gradient-to-r from-blue-900 via-indigo-950 to-blue-900 py-1 px-3 sm:px-4 border-b border-blue-800/40 text-xs text-blue-100 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full">
           <div className="flex items-center gap-1 font-semibold text-blue-200 shrink-0">
@@ -135,33 +151,37 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Month / Year Selector */}
-          <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-lg border border-slate-700 text-xs sm:text-sm">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer py-0.5 px-1 sm:px-1.5 rounded hover:bg-slate-700/50"
+          {/* Sleek Month / Year Navigation Control (< Novembro 2026 >) */}
+          <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 shadow-inner">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              className="p-1 sm:p-1.5 rounded-lg hover:bg-slate-700 text-blue-400 hover:text-white transition active:scale-95 touch-manipulation"
+              title="Mês Anterior"
             >
-              {MONTHS.map((m) => (
-                <option key={m.value} value={m.value} className="bg-slate-800 text-white">
-                  {m.label.slice(0, 3)}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer py-0.5 px-1 sm:px-1.5 rounded hover:bg-slate-700/50"
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+
+            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-0.5">
+              <Calendar className="w-3.5 h-3.5 text-blue-400 hidden sm:inline" />
+              <span className="font-extrabold text-xs sm:text-sm text-white tracking-wide select-none">
+                {MONTHS.find((m) => m.value === selectedMonth)?.label} {selectedYear}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              className="p-1 sm:p-1.5 rounded-lg hover:bg-slate-700 text-blue-400 hover:text-white transition active:scale-95 touch-manipulation"
+              title="Próximo Mês"
             >
-              <option value={2025} className="bg-slate-800 text-white">2025</option>
-              <option value={2026} className="bg-slate-800 text-white">2026</option>
-              <option value={2027} className="bg-slate-800 text-white">2027</option>
-            </select>
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
 
           {/* Actions & User menu */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* New Activity Button (Desktop & Tablet) */}
+            {/* New Activity Button */}
             <button
               onClick={openNewActivityModal}
               className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 sm:py-2 rounded-xl shadow-md shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -170,7 +190,7 @@ export default function Navbar({
               <span>Registrar Treino</span>
             </button>
 
-            {/* Friend Invites / Connections button (Desktop) */}
+            {/* Friends / Connections button */}
             <button
               onClick={openFriendsModal}
               className="hidden sm:flex relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
@@ -191,7 +211,7 @@ export default function Navbar({
                 className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition"
               >
                 <div className="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-xs uppercase border border-blue-500/30">
-                  {profile?.displayName?.[0] || user?.email?.[0] || 'A'}
+                  {profile?.displayName?.[0] || user?.email?.[0] || 'V'}
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -203,8 +223,14 @@ export default function Navbar({
                 >
                   <div className="px-3 py-2 border-b border-slate-700">
                     <p className="font-semibold text-white truncate">{profile?.displayName || 'Atleta'}</p>
-                    <p className="text-[11px] text-slate-400 truncate mb-1">{user?.email}</p>
-                    {user?.emailVerified ? (
+                    <p className="text-[11px] text-slate-400 truncate mb-1">
+                      {user?.uid.startsWith('guest_') ? 'Sessão Visitante' : user?.email}
+                    </p>
+                    {user?.uid.startsWith('guest_') ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-semibold">
+                        Modo Visitante
+                      </span>
+                    ) : user?.emailVerified ? (
                       <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-semibold">
                         <CheckCircle2 className="w-2.5 h-2.5" /> E-mail Verificado
                       </span>
@@ -217,6 +243,7 @@ export default function Navbar({
                       </button>
                     )}
                   </div>
+
                   <button
                     onClick={openGoalsModal}
                     className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
@@ -224,6 +251,7 @@ export default function Navbar({
                     <Settings className="w-3.5 h-3.5 text-slate-400" />
                     <span>Configurar Metas Pessoais</span>
                   </button>
+
                   <button
                     onClick={openFriendsModal}
                     className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
@@ -231,14 +259,9 @@ export default function Navbar({
                     <Users className="w-3.5 h-3.5 text-blue-400" />
                     <span>Conexões ({pendingInvitesCount} pendentes)</span>
                   </button>
-                  <button
-                    onClick={openSpreadsheetModal}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2 text-emerald-400"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    <span>Planilha Original</span>
-                  </button>
+
                   <div className="border-t border-slate-700 my-1"></div>
+
                   <button
                     onClick={logout}
                     className="w-full text-left px-3 py-2 hover:bg-red-500/10 text-red-400 hover:text-red-300 flex items-center gap-2"
@@ -277,19 +300,11 @@ export default function Navbar({
             <Award className="w-4 h-4" />
             <span>Ranking & Desafio dos Amigos</span>
           </button>
-
-          <button
-            onClick={openSpreadsheetModal}
-            className="flex items-center gap-2 py-2.5 px-4 border-b-2 border-transparent text-slate-400 hover:text-emerald-400 text-xs sm:text-sm transition ml-auto"
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Planilha</span>
-          </button>
         </div>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Fixed at bottom on phones, native app feel) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 flex items-center justify-around py-1.5 px-2 text-[10px] font-semibold shadow-2xl safe-area-pb">
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 flex items-center justify-around py-2 px-3 text-[11px] font-semibold shadow-2xl safe-area-pb">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition ${
@@ -300,6 +315,15 @@ export default function Navbar({
           <span>Meu Painel</span>
         </button>
 
+        {/* Center Floating Plus Button for Daily Workout */}
+        <button
+          onClick={openNewActivityModal}
+          className="flex flex-col items-center -mt-6 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-3.5 rounded-full shadow-lg shadow-blue-600/40 border-2 border-slate-900 active:scale-95 transition"
+          title="Registrar Treino"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+
         <button
           onClick={() => setActiveTab('ranking')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition ${
@@ -308,36 +332,6 @@ export default function Navbar({
         >
           <Award className="w-5 h-5" />
           <span>Ranking</span>
-        </button>
-
-        {/* Center Floating Plus Button for Daily Workout */}
-        <button
-          onClick={openNewActivityModal}
-          className="flex flex-col items-center -mt-5 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-3 rounded-full shadow-lg shadow-blue-600/40 border-2 border-slate-900 active:scale-95 transition"
-          title="Registrar Treino"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
-
-        <button
-          onClick={openFriendsModal}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-slate-400 hover:text-white transition relative"
-        >
-          <Users className="w-5 h-5" />
-          <span>Amigos</span>
-          {pendingInvitesCount > 0 && (
-            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-amber-400"></span>
-          )}
-        </button>
-
-        <button
-          onClick={openSpreadsheetModal}
-          className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition touch-manipulation ${
-            activeTab === 'spreadsheet' ? 'text-emerald-400 font-bold' : 'text-slate-400 hover:text-emerald-400'
-          }`}
-        >
-          <FileSpreadsheet className="w-5 h-5" />
-          <span>Planilha</span>
         </button>
       </nav>
     </header>

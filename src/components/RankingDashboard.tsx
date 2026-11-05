@@ -40,7 +40,6 @@ interface RankingDashboardProps {
   connections: FriendConnection[];
   openFriendsModal: () => void;
   openNewActivityModal: () => void;
-  openSpreadsheetModal: () => void;
 }
 
 type ExerciseFilter = 'geral' | 'pullUps' | 'pushUps' | 'sitUps' | 'runningKm';
@@ -51,7 +50,6 @@ export default function RankingDashboard({
   connections,
   openFriendsModal,
   openNewActivityModal,
-  openSpreadsheetModal,
 }: RankingDashboardProps) {
   const { user, profile, activeUserGoals } = useAuth();
   const [rankingList, setRankingList] = useState<AthleteProgressSummary[]>([]);
@@ -440,14 +438,6 @@ export default function RankingDashboard({
           >
             <Users className="w-3.5 h-3.5" />
             <span>Conectar Amigos</span>
-          </button>
-          <button
-            onClick={openSpreadsheetModal}
-            className="text-xs font-semibold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 transition flex items-center gap-1"
-            title="Ver Planilha Original"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Planilha</span>
           </button>
           <button
             onClick={loadData}

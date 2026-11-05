@@ -16,7 +16,6 @@ import RankingDashboard from './components/RankingDashboard';
 import DailyLoggerModal from './components/DailyLoggerModal';
 import FriendConnectionsModal from './components/FriendConnectionsModal';
 import GoalsModal from './components/GoalsModal';
-import SpreadsheetReferenceModal from './components/SpreadsheetReferenceModal';
 import AuthModal from './components/AuthModal';
 import { Dumbbell, Loader2 } from 'lucide-react';
 
@@ -26,7 +25,7 @@ function MainApp() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'ranking' | 'spreadsheet'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'ranking'>('dashboard');
 
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [connections, setConnections] = useState<FriendConnection[]>([]);
@@ -36,7 +35,6 @@ function MainApp() {
   const [editingActivity, setEditingActivity] = useState<ActivityLog | null>(null);
   const [friendsModalOpen, setFriendsModalOpen] = useState(false);
   const [goalsModalOpen, setGoalsModalOpen] = useState(false);
-  const [spreadsheetModalOpen, setSpreadsheetModalOpen] = useState(false);
   const [verifyEmailModalOpen, setVerifyEmailModalOpen] = useState(false);
 
   const refreshData = async () => {
@@ -98,7 +96,6 @@ function MainApp() {
             }}
             openFriendsModal={() => setFriendsModalOpen(true)}
             openGoalsModal={() => setGoalsModalOpen(true)}
-            openSpreadsheetModal={() => setSpreadsheetModalOpen(true)}
             openVerifyEmailModal={() => setVerifyEmailModalOpen(true)}
             selectedMonth={selectedMonth}
             setSelectedMonth={setSelectedMonth}
@@ -137,17 +134,7 @@ function MainApp() {
                   setEditingActivity(null);
                   setDailyLoggerOpen(true);
                 }}
-                openSpreadsheetModal={() => setSpreadsheetModalOpen(true)}
               />
-            )}
-
-            {activeTab === 'spreadsheet' && (
-              <div className="space-y-6">
-                <SpreadsheetReferenceModal
-                  isOpen={true}
-                  onClose={() => setActiveTab('ranking')}
-                />
-              </div>
             )}
           </main>
 
@@ -179,11 +166,6 @@ function MainApp() {
           <GoalsModal
             isOpen={goalsModalOpen}
             onClose={() => setGoalsModalOpen(false)}
-          />
-
-          <SpreadsheetReferenceModal
-            isOpen={spreadsheetModalOpen}
-            onClose={() => setSpreadsheetModalOpen(false)}
           />
 
           {verifyEmailModalOpen && (
