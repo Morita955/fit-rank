@@ -128,6 +128,25 @@ export default function RankingDashboard({
     return ath.averageScore * 20;
   };
 
+  const renderAthleteAvatar = (ath: AthleteProgressSummary, sizeClass = "w-12 h-12") => {
+    const photo = ath.isCurrentUser ? (profile?.photoURL || ath.avatar) : ath.avatar;
+    if (photo) {
+      return (
+        <div className={`${sizeClass} rounded-full overflow-hidden shadow-md shrink-0 border border-slate-700 bg-slate-800`}>
+          <img src={photo} alt={ath.userName} className="w-full h-full object-cover" />
+        </div>
+      );
+    }
+    return (
+      <div
+        className={`${sizeClass} rounded-full text-white font-extrabold flex items-center justify-center shadow-md shrink-0`}
+        style={{ backgroundColor: ath.color }}
+      >
+        {ath.userName?.[0]?.toUpperCase() || 'A'}
+      </div>
+    );
+  };
+
   const firstPlace = sortedRanking[0];
   const secondPlace = sortedRanking[1];
   const thirdPlace = sortedRanking[2];
@@ -174,11 +193,8 @@ export default function RankingDashboard({
             {secondPlace ? (
               <div className="bg-slate-850/80 border border-slate-800 rounded-2xl p-3 text-center space-y-2 relative">
                 <div className="relative inline-block mx-auto">
-                  <div
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full text-white font-extrabold flex items-center justify-center text-base sm:text-lg shadow-md mx-auto border-2 border-slate-400"
-                    style={{ backgroundColor: secondPlace.color }}
-                  >
-                    {secondPlace.userName?.[0] || 'A'}
+                  <div className="mx-auto flex justify-center">
+                    {renderAthleteAvatar(secondPlace, "w-12 h-12 sm:w-14 sm:h-14")}
                   </div>
                   {secondPlace.isCurrentUser && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
@@ -208,11 +224,8 @@ export default function RankingDashboard({
               </div>
 
               <div className="relative inline-block mx-auto pt-2">
-                <div
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full text-white font-black flex items-center justify-center text-xl sm:text-2xl shadow-xl mx-auto ring-4 ring-amber-400/40"
-                  style={{ backgroundColor: firstPlace.color }}
-                >
-                  {firstPlace.userName?.[0] || 'A'}
+                <div className="mx-auto flex justify-center ring-4 ring-amber-400/40 rounded-full">
+                  {renderAthleteAvatar(firstPlace, "w-16 h-16 sm:w-20 sm:h-20")}
                 </div>
                 {firstPlace.isCurrentUser && (
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase shadow">
@@ -235,11 +248,8 @@ export default function RankingDashboard({
             {thirdPlace ? (
               <div className="bg-slate-850/80 border border-slate-800 rounded-2xl p-3 text-center space-y-2 relative">
                 <div className="relative inline-block mx-auto">
-                  <div
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full text-white font-extrabold flex items-center justify-center text-base sm:text-lg shadow-md mx-auto border-2 border-amber-700"
-                    style={{ backgroundColor: thirdPlace.color }}
-                  >
-                    {thirdPlace.userName?.[0] || 'A'}
+                  <div className="mx-auto flex justify-center">
+                    {renderAthleteAvatar(thirdPlace, "w-12 h-12 sm:w-14 sm:h-14")}
                   </div>
                   {thirdPlace.isCurrentUser && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
@@ -295,12 +305,7 @@ export default function RankingDashboard({
                     <span className="font-black text-sm sm:text-base text-amber-400 w-6 text-center shrink-0 font-mono">
                       {idx === 0 ? '1' : idx === 1 ? '2' : idx === 2 ? '3' : `${idx + 1}`}
                     </span>
-                    <div
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-white font-extrabold flex items-center justify-center text-xs sm:text-sm shadow-md shrink-0"
-                      style={{ backgroundColor: ath.color }}
-                    >
-                      {ath.userName?.[0] || 'A'}
-                    </div>
+                    {renderAthleteAvatar(ath, "w-9 h-9 sm:w-10 sm:h-10")}
                     <div className="truncate">
                       {/* Properly formatted and aligned flex row for name and tags */}
                       <div className="flex items-center gap-1.5 flex-wrap">
