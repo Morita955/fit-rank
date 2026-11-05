@@ -17,11 +17,12 @@ import {
   ShieldCheck,
   Sparkles,
   User,
+  UserCheck,
 } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
-  initialMode?: 'login' | 'register' | 'verify_email' | 'forgot_password';
+  initialMode?: 'login' | 'register' | 'guest' | 'verify_email' | 'forgot_password';
   onClose?: () => void;
 }
 
@@ -38,10 +39,11 @@ export default function AuthModal({
     forgotPassword,
     resetPassword,
     loginWithGoogle,
+    loginAsGuest,
     user,
   } = useAuth();
 
-  const [mode, setMode] = useState<'login' | 'register' | 'verify_email' | 'forgot_password'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'register' | 'guest' | 'verify_email' | 'forgot_password'>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -86,7 +88,7 @@ export default function AuthModal({
     }
   };
 
-  // 2. Handle Register (moves automatically to verify_email)
+  // 2. Handle Register
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     resetMessages();
@@ -119,7 +121,33 @@ export default function AuthModal({
     }
   };
 
-  // 3. Handle Verify Email Code
+  // 3. Handle Guest Login
+  const handleGuestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    resetMessages();
+
+    if (!name.trim()) {
+      setError('Por favor, informe o seu nome para continuar.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginAsGuest(name.trim());
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
+      });
+      if (onClose) onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao entrar como visitante.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. Handle Verify Email Code
   const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     resetMessages();
@@ -148,7 +176,7 @@ export default function AuthModal({
     }
   };
 
-  // 3.1 Resend Email Verification Code
+  // Resend Email Verification Code
   const handleResendCode = async () => {
     resetMessages();
     setLoading(true);
@@ -163,7 +191,7 @@ export default function AuthModal({
     }
   };
 
-  // 4. Handle Forgot Password Step 1 (Request code)
+  // Handle Forgot Password Request
   const handleForgotRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     resetMessages();
@@ -186,7 +214,7 @@ export default function AuthModal({
     }
   };
 
-  // 4.1 Handle Forgot Password Step 2 (Reset password)
+  // Handle Reset Password Submit
   const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     resetMessages();
@@ -242,6 +270,8 @@ export default function AuthModal({
               <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             ) : mode === 'forgot_password' ? (
               <KeyRound className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            ) : mode === 'guest' ? (
+              <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             ) : (
               <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             )}
@@ -251,6 +281,8 @@ export default function AuthModal({
               ? 'Confirmação de E-mail'
               : mode === 'forgot_password'
               ? 'Recuperação de Senha'
+              : mode === 'guest'
+              ? 'Entrar como Visitante'
               : 'FitRank Desafio Físico'}
           </h2>
           <p className="text-[11px] sm:text-xs text-blue-100 mt-0.5 max-w-xs mx-auto">
@@ -258,12 +290,14 @@ export default function AuthModal({
               ? 'Verifique sua caixa de entrada para ativar todas as funções da conta.'
               : mode === 'forgot_password'
               ? 'Redefina sua senha com segurança através do código de 6 dígitos.'
+              : mode === 'guest'
+              ? 'Acesse instantaneamente sem precisar criar uma conta ou senha.'
               : 'Acompanhe suas metas de barra, flexão, abdominal e corrida com ranking mútuo.'}
           </p>
         </div>
 
-        {/* Tab Toggle (Only shown when mode is login or register) */}
-        {(mode === 'login' || mode === 'register') && (
+        {/* Tab Toggle */}
+        {(mode === 'login' || mode === 'register' || mode === 'guest') && (
           <div className="flex border-b border-slate-800 bg-slate-850 shrink-0">
             <button
               type="button"
@@ -271,13 +305,13 @@ export default function AuthModal({
                 setMode('login');
                 resetMessages();
               }}
-              className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-bold transition border-b-2 touch-manipulation ${
+              className={`flex-1 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition border-b-2 touch-manipulation ${
                 mode === 'login'
                   ? 'border-blue-500 text-blue-400 bg-blue-500/5'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
-              Entrar com Senha
+              Entrar
             </button>
             <button
               type="button"
@@ -285,13 +319,27 @@ export default function AuthModal({
                 setMode('register');
                 resetMessages();
               }}
-              className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-bold transition border-b-2 touch-manipulation ${
+              className={`flex-1 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition border-b-2 touch-manipulation ${
                 mode === 'register'
                   ? 'border-blue-500 text-blue-400 bg-blue-500/5'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
-              Criar Nova Conta
+              Criar Conta
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('guest');
+                resetMessages();
+              }}
+              className={`flex-1 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition border-b-2 touch-manipulation ${
+                mode === 'guest'
+                  ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Visitante
             </button>
           </div>
         )}
@@ -395,31 +443,90 @@ export default function AuthModal({
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>Entrar com Conta Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('guest');
+                    resetMessages();
+                  }}
+                  className="w-full py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                >
+                  <UserCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Entrar como Visitante (Sem Senha)</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ============================================================== */}
+          {/* MODE: GUEST                                                   */}
+          {/* ============================================================== */}
+          {mode === 'guest' && (
+            <form onSubmit={handleGuestSubmit} className="space-y-4">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-200 space-y-1">
+                <div className="font-bold flex items-center gap-1 text-emerald-400 text-xs">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Acesso Instantâneo
+                </div>
+                <p className="leading-relaxed">
+                  Informe apenas seu nome de atleta para acessar o FitRank, registrar seus treinos diários e acompanhar suas metas sem precisar criar senha ou e-mail.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  Seu Nome de Atleta
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    placeholder="Ex: João Silva ou Visitante"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={handleGoogleLogin}
+                type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>Entrar com Conta Google</span>
+                {loading ? 'Acessando...' : 'Entrar no FitRank como Visitante'}
               </button>
             </form>
           )}
@@ -518,7 +625,7 @@ export default function AuthModal({
 
               <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>Após o cadastro, você receberá um código de 6 dígitos para confirmar seu e-mail.</span>
+                <span>Após o cadastro, você poderá acessar de qualquer dispositivo.</span>
               </div>
 
               <button
@@ -526,7 +633,7 @@ export default function AuthModal({
                 disabled={loading}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               >
-                {loading ? 'Cadastrando...' : 'Cadastrar e Confirmar E-mail'}
+                {loading ? 'Cadastrando...' : 'Cadastrar Atleta'}
               </button>
             </form>
           )}
@@ -543,7 +650,6 @@ export default function AuthModal({
                 <p className="text-sm font-bold text-blue-400 mt-0.5">{email || user?.email}</p>
               </div>
 
-              {/* Simulation Banner for Instant Verification */}
               {simulatedCode && (
                 <div className="p-3 bg-blue-950/60 border border-blue-500/30 rounded-xl space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -668,7 +774,6 @@ export default function AuthModal({
                 </form>
               ) : (
                 <form onSubmit={handleResetSubmit} className="space-y-3.5">
-                  {/* Simulation card for Reset Code */}
                   {simulatedResetCode && (
                     <div className="p-3 bg-amber-950/60 border border-amber-500/30 rounded-xl space-y-1.5">
                       <div className="flex items-center justify-between">
@@ -753,16 +858,15 @@ export default function AuthModal({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                   >
-                    {loading ? 'Salvando...' : 'Redefinir Minha Senha'}
+                    {loading ? 'Alterando...' : 'Redefinir Senha'}
                   </button>
 
                   <div className="text-center pt-2">
                     <button
                       type="button"
                       onClick={() => {
-                        setForgotStep(1);
                         setMode('login');
                         resetMessages();
                       }}

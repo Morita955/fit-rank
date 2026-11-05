@@ -9,6 +9,7 @@ interface AuthUser {
   displayName: string;
   photoURL?: string;
   emailVerified?: boolean;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
@@ -22,6 +23,7 @@ interface AuthContextType {
   forgotPassword: (email: string) => Promise<string>;
   resetPassword: (email: string, code: string, newPass: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  loginAsGuest: (guestName: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUserGoals: (goals: MonthlyGoals) => Promise<void>;
   updateDisplayName: (newName: string) => Promise<void>;
@@ -51,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let currentProfile = existingProfile;
 
       if (!existingProfile && !error) {
-        // Create profile row if not exists
         const newProfile = {
           id: userId,
           email: userEmail,
@@ -102,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(mappedProfile);
     } catch (err) {
       console.error('Erro ao carregar perfil do Supabase:', err);
-      // Fallback auth user state
       const fallbackUser: AuthUser = {
         uid: userId,
         id: userId,
@@ -123,12 +123,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Login as Guest
+  const loginAsGuest = async (guestName: string) => {
+    const cleanName = guestName.trim() || 'Visitante';
+    const existingGuestId = localStorage.getItem('fitrank_guest_id');
+    const guestId = existingGuestId || `guest_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    localStorage.setItem('fitrank_guest_id', guestId);
+    localStorage.setItem('fitrank_guest_name', cleanName);
+
+    const guestUser: AuthUser = {
+      uid: guestId,
+      id: guestId,
+      email: `${guestId}@fitrank.guest`,
+      displayName: cleanName,
+      emailVerified: true,
+      isGuest: true,
+    };
+
+    const savedGoalsJson = localStorage.getItem(`fitrank_goals_${guestId}`);
+    const savedGoals = savedGoalsJson ? JSON.parse(savedGoalsJson) : DEFAULT_GOALS;
+
+    const guestProfile: UserProfile = {
+      uid: guestId,
+      email: `${guestId}@fitrank.guest`,
+      displayName: cleanName,
+      goalPullUps: savedGoals.pullUps,
+      goalPushUps: savedGoals.pushUps,
+      goalSitUps: savedGoals.sitUps,
+      goalRunningKm: savedGoals.runningKm,
+    };
+
+    setUser(guestUser);
+    setProfile(guestProfile);
+  };
+
   // Check existing session on boot & subscribe to changes
   useEffect(() => {
     let isMounted = true;
 
     const checkSession = async () => {
       try {
+        const guestId = localStorage.getItem('fitrank_guest_id');
+        const guestName = localStorage.getItem('fitrank_guest_name');
+        if (guestId && guestName) {
+          await loginAsGuest(guestName);
+          setLoading(false);
+          return;
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await loadProfileForUser(session.user);
@@ -139,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (err) {
-        console.error('Erro ao verificar sessão do Supabase:', err);
+        console.error('Erro ao verificar sessão:', err);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -150,6 +193,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const guestId = localStorage.getItem('fitrank_guest_id');
+      if (guestId) return;
+
       if (session?.user) {
         await loadProfileForUser(session.user);
       } else {
@@ -167,6 +213,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Register with Email and Password
   const registerWithEmail = async (email: string, pass: string, name: string) => {
+    localStorage.removeItem('fitrank_guest_id');
+    localStorage.removeItem('fitrank_guest_name');
+
     if (!isSupabaseConfigured) {
       throw new Error('Supabase não configurado. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.');
     }
@@ -184,7 +233,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (data.user) {
-      // Create profile row in database
       await supabase.from('profiles').upsert({
         id: data.user.id,
         email,
@@ -202,6 +250,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Login with Email and Password
   const loginWithEmail = async (email: string, pass: string) => {
+    localStorage.removeItem('fitrank_guest_id');
+    localStorage.removeItem('fitrank_guest_name');
+
     if (!isSupabaseConfigured) {
       throw new Error('Supabase não configurado. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.');
     }
@@ -222,6 +273,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Google Sign In via Supabase OAuth
   const loginWithGoogle = async () => {
+    localStorage.removeItem('fitrank_guest_id');
+    localStorage.removeItem('fitrank_guest_name');
+
     if (!isSupabaseConfigured) {
       throw new Error('Supabase não configurado. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.');
     }
@@ -283,18 +337,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Logout
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      if (!user?.uid.startsWith('guest_')) {
+        await supabase.auth.signOut();
+      }
     } catch (e) {
       console.error(e);
     } finally {
+      localStorage.removeItem('fitrank_guest_id');
+      localStorage.removeItem('fitrank_guest_name');
       setUser(null);
       setProfile(null);
     }
   };
 
-  // Update monthly goals in Supabase profiles table
+  // Update monthly goals
   const updateUserGoals = async (goals: MonthlyGoals) => {
     if (!user) return;
+
+    if (user.uid.startsWith('guest_')) {
+      localStorage.setItem(`fitrank_goals_${user.uid}`, JSON.stringify(goals));
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              goalPullUps: goals.pullUps,
+              goalPushUps: goals.pushUps,
+              goalSitUps: goals.sitUps,
+              goalRunningKm: goals.runningKm,
+            }
+          : null
+      );
+      return;
+    }
 
     const { error } = await supabase
       .from('profiles')
@@ -326,6 +400,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Update athlete display name
   const updateDisplayName = async (newName: string) => {
     if (!user) return;
+
+    if (user.uid.startsWith('guest_')) {
+      localStorage.setItem('fitrank_guest_name', newName);
+      setProfile((prev) => (prev ? { ...prev, displayName: newName } : null));
+      setUser((prev) => (prev ? { ...prev, displayName: newName } : null));
+      return;
+    }
 
     const { error } = await supabase
       .from('profiles')
@@ -364,6 +445,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forgotPassword,
         resetPassword,
         loginWithGoogle,
+        loginAsGuest,
         logout,
         updateUserGoals,
         updateDisplayName,
