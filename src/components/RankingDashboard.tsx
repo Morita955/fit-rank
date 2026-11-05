@@ -61,9 +61,10 @@ export default function RankingDashboard({
     if (!user) return;
     setLoading(true);
     try {
+      const currentName = profile?.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Atleta');
       const ranking = await getMonthRankingData(
         user.uid,
-        profile?.displayName || 'Atleta',
+        currentName,
         selectedYear,
         selectedMonth,
         activeUserGoals
@@ -81,7 +82,7 @@ export default function RankingDashboard({
     try {
       await acceptFriendRequest(connId);
       await loadData();
-      window.location.reload(); // Quick refresh to update connections state in App
+      window.location.reload();
     } catch (e) {
       console.error(e);
     } finally {
@@ -102,7 +103,7 @@ export default function RankingDashboard({
     }
   };
 
-  // Sort ranking according to selected filter and category unit
+  // Sort ranking according to selected filter
   const sortedRanking = [...rankingList].sort((a, b) => {
     if (exerciseFilter === 'pullUps') return b.pullUps - a.pullUps;
     if (exerciseFilter === 'pushUps') return b.pushUps - a.pushUps;
@@ -124,7 +125,7 @@ export default function RankingDashboard({
     if (exerciseFilter === 'pushUps') return ath.pushUps;
     if (exerciseFilter === 'sitUps') return ath.sitUps;
     if (exerciseFilter === 'runningKm') return Math.round(ath.runningKm * 10) / 10;
-    return ath.averageScore * 20; // Simulated pts scale
+    return ath.averageScore * 20;
   };
 
   const firstPlace = sortedRanking[0];
@@ -133,7 +134,7 @@ export default function RankingDashboard({
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-200">
-      {/* Top Filter Pills (Geral, Barra Fixa, Flexões, Abdominais, Corrida) */}
+      {/* Top Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
         {[
           { id: 'geral', label: 'Geral' },
@@ -156,12 +157,12 @@ export default function RankingDashboard({
         ))}
       </div>
 
-      {/* Pódio Provisório / Top Contenders */}
+      {/* Pódio (Without "Provisório") */}
       {firstPlace && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl relative overflow-hidden space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-              🏆 Pódio Provisório
+              🏆 Pódio
             </span>
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
               Top Contenders
@@ -278,7 +279,7 @@ export default function RankingDashboard({
 
         <div className="space-y-3">
           {sortedRanking.map((ath, idx) => {
-            const pct = exerciseFilter === 'geral' ? ath.averageScore : Math.min(200, Math.round((getMetricPoints(ath) / (exerciseFilter === 'pullUps' ? (activeUserGoals.pullUps || 200) : exerciseFilter === 'pushUps' ? (activeUserGoals.pushUps || 1000) : exerciseFilter === 'sitUps' ? (activeUserGoals.sitUps || 500) : (activeUserGoals.runningKm || 50))) * 100));
+            const pct = exerciseFilter === 'geral' ? ath.averageScore : Math.min(300, Math.round((getMetricPoints(ath) / (exerciseFilter === 'pullUps' ? (activeUserGoals.pullUps || 200) : exerciseFilter === 'pushUps' ? (activeUserGoals.pushUps || 1000) : exerciseFilter === 'sitUps' ? (activeUserGoals.sitUps || 500) : (activeUserGoals.runningKm || 50))) * 100));
 
             return (
               <div
@@ -301,16 +302,17 @@ export default function RankingDashboard({
                       {ath.userName?.[0] || 'A'}
                     </div>
                     <div className="truncate">
-                      <div className="flex items-center gap-2 truncate">
+                      {/* Properly formatted and aligned flex row for name and tags */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-black text-white text-sm sm:text-base truncate">{ath.userName}</span>
                         {ath.isCurrentUser && (
-                          <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-blue-600 text-white uppercase tracking-wider shrink-0 shadow">
-                            Você
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-600 text-white uppercase tracking-wider shrink-0 shadow">
+                            VOCÊ
                           </span>
                         )}
                         {idx === 0 && (
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-amber-500 text-slate-950 uppercase tracking-wider shrink-0 shadow">
-                            Líder
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 uppercase tracking-wider shrink-0 shadow">
+                            LÍDER
                           </span>
                         )}
                       </div>
@@ -350,7 +352,7 @@ export default function RankingDashboard({
         </div>
       </div>
 
-      {/* Solicitacoes de Amizade (Pending Invites) */}
+      {/* Solicitacoes de Amizade */}
       {pendingInvites.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -402,8 +404,8 @@ export default function RankingDashboard({
 
       {/* Gerenciar Amigos Privados Button */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl flex items-center justify-between cursor-pointer hover:border-slate-700 transition group" onClick={openFriendsModal}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
             <UserCheck className="w-5 h-5" />
           </div>
           <div>
@@ -415,7 +417,7 @@ export default function RankingDashboard({
             </p>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition" />
+        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition shrink-0" />
       </div>
     </div>
   );

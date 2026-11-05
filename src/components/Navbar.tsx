@@ -12,6 +12,7 @@ import {
   Dumbbell,
   Flame,
   LogOut,
+  Pencil,
   Plus,
   RotateCcw,
   Settings,
@@ -161,7 +162,7 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Month / Year Navigation Control (< Novembro 2026 >) with Quick Current Month & Picker */}
+          {/* Month / Year Navigation Control */}
           <div className="flex items-center gap-1.5">
             <div className="flex items-center gap-0.5 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 shadow-inner">
               <button
@@ -235,7 +236,7 @@ export default function Navbar({
               )}
             </button>
 
-            {/* User Profile dropdown */}
+            {/* User Profile dropdown with Edit Profile Pencil button */}
             <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
@@ -252,11 +253,23 @@ export default function Navbar({
                   className="absolute right-0 mt-2 w-56 rounded-xl bg-slate-800 border border-slate-700 shadow-xl py-1 text-xs text-slate-300 z-50 animate-in fade-in zoom-in-95 duration-100"
                   onClick={() => setUserDropdownOpen(false)}
                 >
-                  <div className="px-3 py-2 border-b border-slate-700">
-                    <p className="font-semibold text-white truncate">{profile?.displayName || 'Atleta'}</p>
-                    <p className="text-[11px] text-slate-400 truncate mb-1">
-                      {user?.uid.startsWith('guest_') ? 'Sessão Visitante' : user?.email}
-                    </p>
+                  <div className="px-3 py-2.5 border-b border-slate-700 flex items-center justify-between">
+                    <div className="truncate pr-2">
+                      <p className="font-bold text-white truncate text-sm">{profile?.displayName || 'Atleta'}</p>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {user?.uid.startsWith('guest_') ? 'Sessão Visitante' : user?.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={openGoalsModal}
+                      className="p-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 transition shrink-0"
+                      title="Editar Perfil, Nome e Metas"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="px-3 py-1.5 border-b border-slate-700">
                     {user?.uid.startsWith('guest_') ? (
                       <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-semibold">
                         Modo Visitante
@@ -280,7 +293,7 @@ export default function Navbar({
                     className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
                   >
                     <Settings className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Configurar Metas Pessoais</span>
+                    <span>Configurar Perfil & Metas</span>
                   </button>
 
                   <button
@@ -288,7 +301,7 @@ export default function Navbar({
                     className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
                   >
                     <Users className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Conexões ({pendingInvitesCount} pendentes)</span>
+                    <span>Gerenciar Conexões ({pendingInvitesCount} pendentes)</span>
                   </button>
 
                   <div className="border-t border-slate-700 my-1"></div>
