@@ -221,25 +221,31 @@ export async function fetchUserConnections(): Promise<FriendConnection[]> {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name')
+      .select('id, display_name, email')
       .in('id', Array.from(userIds));
 
-    const profileMap = new Map<string, string>();
-    profiles?.forEach((p: any) => profileMap.set(p.id, p.display_name));
+    const profileMap = new Map<string, { name: string; email: string }>();
+    profiles?.forEach((p: any) => profileMap.set(p.id, { name: p.display_name, email: p.email }));
 
-    return data.map((item: any) => ({
-      id: item.id,
-      userA: item.requester_id,
-      userB: item.target_id,
-      requesterId: item.requester_id,
-      targetId: item.target_id,
-      requesterName: profileMap.get(item.requester_id) || 'Atleta',
-      targetName: profileMap.get(item.target_id) || 'Atleta',
-      participants: [item.requester_id, item.target_id],
-      status: item.status,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-    }));
+    return data.map((item: any) => {
+      const reqProf = profileMap.get(item.requester_id);
+      const tarProf = profileMap.get(item.target_id);
+      return {
+        id: item.id,
+        userA: item.requester_id,
+        userB: item.target_id,
+        requesterId: item.requester_id,
+        targetId: item.target_id,
+        requesterName: reqProf?.name || 'Atleta',
+        requesterEmail: reqProf?.email || '',
+        targetName: tarProf?.name || 'Atleta',
+        targetEmail: tarProf?.email || '',
+        participants: [item.requester_id, item.target_id],
+        status: item.status,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      };
+    });
   } catch (e) {
     return [];
   }

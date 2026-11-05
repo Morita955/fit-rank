@@ -207,13 +207,13 @@ export default function FriendConnectionsModal({
                     key={req.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700 gap-3"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">
+                    <div className="flex items-center gap-2.5 truncate">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs shrink-0">
                         {req.requesterName?.[0] || 'A'}
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">{req.requesterName || 'Atleta'}</p>
-                        <p className="text-[11px] text-slate-400">Solicitou ver seu progresso no ranking</p>
+                      <div className="truncate">
+                        <p className="text-xs font-bold text-white truncate">{req.requesterName || 'Atleta'}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{req.requesterEmail || 'E-mail não disponível'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

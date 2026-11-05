@@ -56,7 +56,9 @@ export interface FriendConnection {
   requesterId: string;
   targetId: string;
   requesterName?: string;
+  requesterEmail?: string;
   targetName?: string;
+  targetEmail?: string;
   participants: string[];
   status: ConnectionStatus;
   createdAt?: string;
