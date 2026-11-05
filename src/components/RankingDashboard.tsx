@@ -407,23 +407,7 @@ export default function RankingDashboard({
         </div>
       )}
 
-      {/* Gerenciar Amigos Privados Button */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl flex items-center justify-between cursor-pointer hover:border-slate-700 transition group" onClick={openFriendsModal}>
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="font-bold text-white text-sm sm:text-base group-hover:text-blue-400 transition">
-              Gerenciar Amigos Privados
-            </h4>
-            <p className="text-xs text-slate-400">
-              {acceptedFriendsCount} {acceptedFriendsCount === 1 ? 'amigo conectado' : 'amigos conectados'}
-            </p>
-          </div>
-        </div>
-        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition shrink-0" />
-      </div>
+
     </div>
   );
 }
