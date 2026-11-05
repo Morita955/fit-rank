@@ -27,6 +27,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateUserGoals: (goals: MonthlyGoals) => Promise<void>;
   updateDisplayName: (newName: string) => Promise<void>;
+  updateProfilePhoto: (photoUrl: string) => Promise<void>;
   activeUserGoals: MonthlyGoals;
 }
 
@@ -37,6 +38,7 @@ interface LocalUserRecord {
   email: string;
   password: string;
   displayName: string;
+  photoURL?: string;
 }
 
 function getLocalUsers(): LocalUserRecord[] {
@@ -100,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         uid: userId,
         email: userEmail,
         displayName: currentProfile?.display_name || metaName || 'Atleta',
-        photoURL: sbUser.user_metadata?.avatar_url || currentProfile?.photo_url || undefined,
+        photoURL: currentProfile?.photo_url || sbUser.user_metadata?.avatar_url || undefined,
         emailVerified: Boolean(sbUser.email_confirmed_at),
         goalPullUps: currentProfile?.goal_pull_ups ?? DEFAULT_GOALS.pullUps,
         goalPushUps: currentProfile?.goal_push_ups ?? DEFAULT_GOALS.pushUps,
@@ -163,11 +165,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const savedGoalsJson = localStorage.getItem(`fitrank_goals_${guestId}`);
     const savedGoals = savedGoalsJson ? JSON.parse(savedGoalsJson) : DEFAULT_GOALS;
+    const savedPhoto = localStorage.getItem(`fitrank_guest_photo_${guestId}`) || undefined;
+
+    if (savedPhoto) {
+      guestUser.photoURL = savedPhoto;
+    }
 
     const guestProfile: UserProfile = {
       uid: guestId,
       email: `${guestId}@fitrank.guest`,
       displayName: cleanName,
+      photoURL: savedPhoto,
       goalPullUps: savedGoals.pullUps,
       goalPushUps: savedGoals.pushUps,
       goalSitUps: savedGoals.sitUps,
@@ -204,6 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: found.id,
               email: found.email,
               displayName: found.displayName,
+              photoURL: found.photoURL,
               emailVerified: true,
             };
             const savedGoalsJson = localStorage.getItem(`fitrank_goals_${found.id}`);
@@ -213,6 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               uid: found.id,
               email: found.email,
               displayName: found.displayName,
+              photoURL: found.photoURL,
               goalPullUps: savedGoals.pullUps,
               goalPushUps: savedGoals.pushUps,
               goalSitUps: savedGoals.sitUps,
@@ -286,7 +296,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('fitrank_guest_name');
     localStorage.removeItem('fitrank_local_session');
 
-    // If Supabase is configured, use Supabase Auth
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -315,7 +324,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {};
     }
 
-    // Fallback local account creation so APK works out-of-the-box without Supabase setup
     const users = getLocalUsers();
     if (users.some((u) => u.email.toLowerCase() === email.trim().toLowerCase())) {
       throw new Error('Este e-mail já está cadastrado.');
@@ -362,7 +370,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('fitrank_guest_name');
     localStorage.removeItem('fitrank_local_session');
 
-    // If Supabase is configured, use Supabase Auth
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -379,7 +386,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Fallback local login
     const users = getLocalUsers();
     const found = users.find(
       (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === pass
@@ -396,6 +402,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: found.id,
       email: found.email,
       displayName: found.displayName,
+      photoURL: found.photoURL,
       emailVerified: true,
     };
 
@@ -406,6 +413,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       uid: found.id,
       email: found.email,
       displayName: found.displayName,
+      photoURL: found.photoURL,
       goalPullUps: savedGoals.pullUps,
       goalPushUps: savedGoals.pushUps,
       goalSitUps: savedGoals.sitUps,
@@ -416,7 +424,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(profile);
   };
 
-  // Google Sign In via Supabase OAuth
   const loginWithGoogle = async () => {
     localStorage.removeItem('fitrank_guest_id');
     localStorage.removeItem('fitrank_guest_name');
@@ -438,7 +445,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Verify email / OTP code
   const verifyEmailCode = async (_code: string, email?: string) => {
     if (email && user) {
       setUser((prev) => (prev ? { ...prev, emailVerified: true } : null));
@@ -461,7 +467,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return 'Código/Link enviado por e-mail.';
   };
 
-  // Forgot password
   const forgotPassword = async (email: string): Promise<string> => {
     if (!isSupabaseConfigured) throw new Error('Recuperação de senha exige Supabase configurado.');
 
@@ -475,7 +480,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return 'E-mail de recuperação enviado com sucesso.';
   };
 
-  // Reset password
   const resetPassword = async (_email: string, _code: string, newPass: string): Promise<void> => {
     if (!isSupabaseConfigured) throw new Error('Redefinição de senha exige Supabase configurado.');
 
@@ -485,7 +489,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Logout
   const logout = async () => {
     try {
       if (isSupabaseConfigured && !user?.uid.startsWith('guest_')) {
@@ -502,7 +505,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Update monthly goals
   const updateUserGoals = async (goals: MonthlyGoals) => {
     if (!user) return;
 
@@ -549,7 +551,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // Update athlete display name
   const updateDisplayName = async (newName: string) => {
     if (!user) return;
 
@@ -577,6 +578,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => (prev ? { ...prev, displayName: newName } : null));
   };
 
+  const updateProfilePhoto = async (newPhotoUrl: string) => {
+    if (!user) return;
+
+    if (user.uid.startsWith('guest_') || !isSupabaseConfigured) {
+      localStorage.setItem(`fitrank_guest_photo_${user.uid}`, newPhotoUrl);
+      setProfile((prev) => (prev ? { ...prev, photoURL: newPhotoUrl } : null));
+      setUser((prev) => (prev ? { ...prev, photoURL: newPhotoUrl } : null));
+      return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ photo_url: newPhotoUrl })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Erro ao atualizar foto no Supabase:', error);
+    }
+
+    setProfile((prev) => (prev ? { ...prev, photoURL: newPhotoUrl } : null));
+    setUser((prev) => (prev ? { ...prev, photoURL: newPhotoUrl } : null));
+  };
+
   const activeUserGoals: MonthlyGoals = {
     pullUps: profile?.goalPullUps ?? DEFAULT_GOALS.pullUps,
     pushUps: profile?.goalPushUps ?? DEFAULT_GOALS.pushUps,
@@ -601,6 +625,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         updateUserGoals,
         updateDisplayName,
+        updateProfilePhoto,
         activeUserGoals,
       }}
     >
