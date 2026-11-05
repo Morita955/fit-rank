@@ -225,7 +225,7 @@ export default function Navbar({
             {/* Friends / Connections button */}
             <button
               onClick={openFriendsModal}
-              className="hidden sm:flex relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              className="flex relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
               title="Amigos & Solicitações"
             >
               <Users className="w-4 h-4" />
@@ -288,13 +288,7 @@ export default function Navbar({
                     )}
                   </div>
 
-                  <button
-                    onClick={openFriendsModal}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
-                  >
-                    <Users className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Gerenciar Conexões ({pendingInvitesCount} pendentes)</span>
-                  </button>
+
 
                   <div className="border-t border-slate-700 my-1"></div>
 
