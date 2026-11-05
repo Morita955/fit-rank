@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../firebase/authContext';
 import { DEFAULT_GOALS, MonthlyGoals } from '../types';
-import { Camera, Check, Image as ImageIcon, Settings, User, X } from 'lucide-react';
+import { Camera, Check, Settings, User, X } from 'lucide-react';
 
 interface GoalsModalProps {
   isOpen: boolean;
@@ -33,13 +33,40 @@ export default function GoalsModal({ isOpen, onClose }: GoalsModalProps) {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoURL(reader.result as string);
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 250;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setPhotoURL(dataUrl);
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -97,7 +124,7 @@ export default function GoalsModal({ isOpen, onClose }: GoalsModalProps) {
 
         {/* Body */}
         <form onSubmit={handleSave} className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
-          {/* Avatar Preview & Upload */}
+          {/* Avatar Preview & Upload (Supports all image formats without URL) */}
           <div className="flex flex-col items-center gap-3 bg-slate-850 p-4 rounded-2xl border border-slate-800">
             <div className="relative group">
               <div className="w-20 h-20 rounded-2xl overflow-hidden bg-blue-600/30 border-2 border-blue-500/40 flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
@@ -108,11 +135,18 @@ export default function GoalsModal({ isOpen, onClose }: GoalsModalProps) {
                 )}
               </div>
               <label className="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl shadow cursor-pointer transition">
-                <Camera className="w-3.5 h-3.5" />
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                <Camera className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp, image/heic, image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
               </label>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">Toque no ícone de câmera para enviar foto</span>
+            <span className="text-[11px] text-slate-400 font-medium text-center">
+              Toque na câmera para carregar foto do celular ou PC (PNG, JPG, WEBP, etc.)
+            </span>
           </div>
 
           <div>
@@ -127,22 +161,6 @@ export default function GoalsModal({ isOpen, onClose }: GoalsModalProps) {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">
-              Foto de Perfil (URL da Imagem)
-            </label>
-            <div className="relative">
-              <ImageIcon className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
-              <input
-                type="url"
-                value={photoURL}
-                onChange={(e) => setPhotoURL(e.target.value)}
-                placeholder="https://exemplo.com/foto.jpg"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
