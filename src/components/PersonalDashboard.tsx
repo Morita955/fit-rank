@@ -49,13 +49,13 @@ export default function PersonalDashboard({
   const totalSitUps = activities.reduce((acc, a) => acc + (a.sitUps || 0), 0);
   const totalRunningKm = Math.round(activities.reduce((acc, a) => acc + (a.runningKm || 0), 0) * 100) / 100;
 
-  // Percentages toward monthly goals
-  const pctPullUps = Math.min(100, Math.round((totalPullUps / (activeUserGoals.pullUps || 1)) * 100));
-  const pctPushUps = Math.min(100, Math.round((totalPushUps / (activeUserGoals.pushUps || 1)) * 100));
-  const pctSitUps = Math.min(100, Math.round((totalSitUps / (activeUserGoals.sitUps || 1)) * 100));
-  const pctRunningKm = Math.min(100, Math.round((totalRunningKm / (activeUserGoals.runningKm || 1)) * 100));
+  // Percentages toward monthly goals (can exceed 100%)
+  const pctPullUps = Math.round((totalPullUps / (activeUserGoals.pullUps || 1)) * 100);
+  const pctPushUps = Math.round((totalPushUps / (activeUserGoals.pushUps || 1)) * 100);
+  const pctSitUps = Math.round((totalSitUps / (activeUserGoals.sitUps || 1)) * 100);
+  const pctRunningKm = Math.round((totalRunningKm / (activeUserGoals.runningKm || 1)) * 100);
 
-  // Overall average completion
+  // Overall average completion (sum of % divided by 4, can exceed 100%)
   const averagePct = Math.round((pctPullUps + pctPushUps + pctSitUps + pctRunningKm) / 4);
 
   // Active workout days
@@ -166,7 +166,7 @@ export default function PersonalDashboard({
           <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/50 mb-2">
             <div
               className="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-blue-500/50"
-              style={{ width: `${pctPullUps}%` }}
+              style={{ width: `${Math.min(100, pctPullUps)}%` }}
             ></div>
           </div>
 
@@ -205,7 +205,7 @@ export default function PersonalDashboard({
           <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/50 mb-2">
             <div
               className="bg-gradient-to-r from-emerald-600 to-teal-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-emerald-500/50"
-              style={{ width: `${pctPushUps}%` }}
+              style={{ width: `${Math.min(100, pctPushUps)}%` }}
             ></div>
           </div>
 
@@ -244,7 +244,7 @@ export default function PersonalDashboard({
           <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/50 mb-2">
             <div
               className="bg-gradient-to-r from-cyan-600 to-blue-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/50"
-              style={{ width: `${pctSitUps}%` }}
+              style={{ width: `${Math.min(100, pctSitUps)}%` }}
             ></div>
           </div>
 
@@ -283,7 +283,7 @@ export default function PersonalDashboard({
           <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/50 mb-2">
             <div
               className="bg-gradient-to-r from-orange-600 to-amber-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-orange-500/50"
-              style={{ width: `${pctRunningKm}%` }}
+              style={{ width: `${Math.min(100, pctRunningKm)}%` }}
             ></div>
           </div>
 
@@ -441,7 +441,7 @@ export default function PersonalDashboard({
                     <div className="bg-cyan-500/10 px-2.5 py-1 rounded border border-cyan-500/20 text-cyan-300">
                       🧘 Abdom: <span className="font-bold">{act.sitUps}</span>
                     </div>
-                    <div className="bg-orange-500/10 px-2.5 py-1 logged-item px-2.5 py-1 rounded border border-orange-500/20 text-orange-300">
+                    <div className="bg-orange-500/10 px-2.5 py-1 rounded border border-orange-500/20 text-orange-300">
                       🏃 Corrida: <span className="font-bold">{act.runningKm}k</span>
                     </div>
                   </div>
