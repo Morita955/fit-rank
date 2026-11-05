@@ -289,14 +289,6 @@ export default function Navbar({
                   </div>
 
                   <button
-                    onClick={openGoalsModal}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
-                  >
-                    <Settings className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Configurar Perfil & Metas</span>
-                  </button>
-
-                  <button
                     onClick={openFriendsModal}
                     className="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2"
                   >
