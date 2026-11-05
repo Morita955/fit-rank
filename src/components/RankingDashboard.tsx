@@ -326,7 +326,7 @@ export default function RankingDashboard({
 
                   <div className="text-right shrink-0">
                     <span className="text-sm sm:text-base font-black text-amber-300 font-mono">
-                      {exerciseFilter === 'geral' ? `${Math.round(ath.averageScore * 20)} pts` : getMetricValue(ath)}
+                      {getMetricValue(ath)}
                     </span>
                     {ath.isCurrentUser && (
                       <span className="text-[10px] font-bold text-emerald-400 block mt-0.5">
