@@ -7,3 +7,6 @@ coverage/
 .env
 !.env.example
 .idea/
+firebase-applet-config.json
+data/fitrank_db.json
+fitrank-debug.apk
