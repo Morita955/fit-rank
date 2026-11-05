@@ -1,0 +1,343 @@
+{
+  "users": [
+    {
+      "id": "usr_allan",
+      "email": "allan.kayro95@gmail.com",
+      "displayName": "Allan Kayro",
+      "passwordHash": "57c7ede13d94dabf0e04ec2edfa89031c75d77bef088581e5c91f0cc250fce127074f7467d53bf37eaf80fdf35e310f0b333aef51259738f9d68b203542b9591",
+      "salt": "a7bb865c25b8ec6c1ee80e30e3cb7d65",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:27:10.190Z"
+    },
+    {
+      "id": "usr_samuel",
+      "email": "samuel@fitrank.com",
+      "displayName": "Samuel",
+      "passwordHash": "564a85529f5f2f6392966d173b072c5fd0a5a7b5266b5c9cf43b40f98da0ee75296e8bb0beae85fe310f50e697881dedd2d6455ad78c12d5c7c30bda888f8449",
+      "salt": "fitrank_benchmark_salt",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "usr_jose",
+      "email": "jose@fitrank.com",
+      "displayName": "Jose",
+      "passwordHash": "564a85529f5f2f6392966d173b072c5fd0a5a7b5266b5c9cf43b40f98da0ee75296e8bb0beae85fe310f50e697881dedd2d6455ad78c12d5c7c30bda888f8449",
+      "salt": "fitrank_benchmark_salt",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "usr_jairo",
+      "email": "jairo@fitrank.com",
+      "displayName": "Jairo",
+      "passwordHash": "564a85529f5f2f6392966d173b072c5fd0a5a7b5266b5c9cf43b40f98da0ee75296e8bb0beae85fe310f50e697881dedd2d6455ad78c12d5c7c30bda888f8449",
+      "salt": "fitrank_benchmark_salt",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "usr_thiago",
+      "email": "thiago@fitrank.com",
+      "displayName": "Thiago",
+      "passwordHash": "564a85529f5f2f6392966d173b072c5fd0a5a7b5266b5c9cf43b40f98da0ee75296e8bb0beae85fe310f50e697881dedd2d6455ad78c12d5c7c30bda888f8449",
+      "salt": "fitrank_benchmark_salt",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "usr_1793808531891_buinj",
+      "email": "atleta.teste@fitrank.com",
+      "displayName": "Novo Atleta",
+      "passwordHash": "a9207b1d6669738ad910ea79137ae3998445a76379d7f53be324f461de3793af60d23dda1cf7a38e4f837e37c7332ce689435fce51bdc564071d4d5a1c318a5c",
+      "salt": "89ed94e5102429aaf8c034d13cb841fe",
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:08:51.891Z",
+      "updatedAt": "2026-11-04T16:08:51.891Z"
+    },
+    {
+      "id": "usr_1793809637973_2kzd4",
+      "email": "novo.usuario@teste.com",
+      "displayName": "Usuario Teste",
+      "passwordHash": "e081a0060c73a585496e5d0937228f46c4651e5a50861d03ab79a7ddecd5f789c21cef9202193dc94ee9455fbb6e760cb43fd6b8d54162e8c2ce3e5ae9823212",
+      "salt": "252b9126e3b906017765954f239839b3",
+      "emailVerified": true,
+      "goalPullUps": 200,
+      "goalPushUps": 1000,
+      "goalSitUps": 500,
+      "goalRunningKm": 50,
+      "createdAt": "2026-11-04T16:27:17.973Z",
+      "updatedAt": "2026-11-04T16:27:21.891Z"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act_a1",
+      "userId": "usr_allan",
+      "date": "2026-01-15",
+      "pullUps": 345,
+      "pushUps": 1835,
+      "sitUps": 193,
+      "runningKm": 15,
+      "notes": "Janeiro épico",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_a2",
+      "userId": "usr_allan",
+      "date": "2026-02-10",
+      "pullUps": 243,
+      "pushUps": 610,
+      "sitUps": 20,
+      "runningKm": 12.65,
+      "notes": "Fevereiro forte",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_a3",
+      "userId": "usr_allan",
+      "date": "2026-03-05",
+      "pullUps": 52,
+      "pushUps": 0,
+      "sitUps": 0,
+      "runningKm": 10.5,
+      "notes": "Março",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_a0",
+      "userId": "usr_allan",
+      "date": "2025-12-20",
+      "pullUps": 0,
+      "pushUps": 245,
+      "sitUps": 50,
+      "runningKm": 0,
+      "notes": "Dezembro inicial",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s0",
+      "userId": "usr_samuel",
+      "date": "2025-12-15",
+      "pullUps": 29,
+      "pushUps": 1110,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s1",
+      "userId": "usr_samuel",
+      "date": "2026-01-20",
+      "pullUps": 40,
+      "pushUps": 1758,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s2",
+      "userId": "usr_samuel",
+      "date": "2026-02-18",
+      "pullUps": 109,
+      "pushUps": 2068,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s3",
+      "userId": "usr_samuel",
+      "date": "2026-03-22",
+      "pullUps": 0,
+      "pushUps": 2006,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s4",
+      "userId": "usr_samuel",
+      "date": "2026-04-10",
+      "pullUps": 0,
+      "pushUps": 664,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s5",
+      "userId": "usr_samuel",
+      "date": "2026-05-15",
+      "pullUps": 0,
+      "pushUps": 466,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_s6",
+      "userId": "usr_samuel",
+      "date": "2026-06-12",
+      "pullUps": 0,
+      "pushUps": 414,
+      "sitUps": 0,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_j0",
+      "userId": "usr_jose",
+      "date": "2025-12-28",
+      "pullUps": 0,
+      "pushUps": 730,
+      "sitUps": 625,
+      "runningKm": 55.4,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_j1",
+      "userId": "usr_jose",
+      "date": "2026-01-10",
+      "pullUps": 0,
+      "pushUps": 25,
+      "sitUps": 0,
+      "runningKm": 1,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "act_jr0",
+      "userId": "usr_jairo",
+      "date": "2025-12-18",
+      "pullUps": 12,
+      "pushUps": 130,
+      "sitUps": 50,
+      "runningKm": 0,
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn_allan_samuel",
+      "userA": "usr_allan",
+      "userB": "usr_samuel",
+      "requesterId": "usr_allan",
+      "targetId": "usr_samuel",
+      "requesterName": "Allan",
+      "targetName": "Samuel",
+      "status": "accepted",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "conn_allan_jose",
+      "userA": "usr_allan",
+      "userB": "usr_jose",
+      "requesterId": "usr_allan",
+      "targetId": "usr_jose",
+      "requesterName": "Allan",
+      "targetName": "Jose",
+      "status": "accepted",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "conn_allan_jairo",
+      "userA": "usr_allan",
+      "userB": "usr_jairo",
+      "requesterId": "usr_allan",
+      "targetId": "usr_jairo",
+      "requesterName": "Allan",
+      "targetName": "Jairo",
+      "status": "accepted",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    },
+    {
+      "id": "conn_allan_thiago",
+      "userA": "usr_allan",
+      "userB": "usr_thiago",
+      "requesterId": "usr_allan",
+      "targetId": "usr_thiago",
+      "requesterName": "Allan",
+      "targetName": "Thiago",
+      "status": "accepted",
+      "createdAt": "2026-11-04T16:08:45.893Z",
+      "updatedAt": "2026-11-04T16:08:45.893Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "796633737eac973427c716961336a9729929a9fdeb31eafb430f6704aea16ecb",
+      "userId": "usr_1793808531891_buinj",
+      "expiresAt": 1796400531891
+    },
+    {
+      "token": "a4f590da3fe593d2616f7631b2fc880420cb6c7cd7ba016a745ef0ba86a3789d",
+      "userId": "usr_1793808531891_buinj",
+      "expiresAt": 1796400536790
+    },
+    {
+      "token": "b64b64dc831ff91a15b4dd62ef31c2a7a09439306527b346992eee8ff5d6d14c",
+      "userId": "usr_allan",
+      "expiresAt": 1796400540610
+    },
+    {
+      "token": "865dd804b4892e94915ff92a85eb628f7542da29b7f89b83b5ec28435538af59",
+      "userId": "usr_allan",
+      "expiresAt": 1796400558183
+    },
+    {
+      "token": "8e8d522cb0e36662d9306327055890fd94a8fbd6f6e9c34465b39bb48679b30c",
+      "userId": "usr_allan",
+      "expiresAt": 1796400561910
+    },
+    {
+      "token": "25a57a69a0f16dcde20bd6680bc1d220c4dc0ce280c034ae1d82955afa1d384b",
+      "userId": "usr_allan",
+      "expiresAt": 1796401633988
+    },
+    {
+      "token": "3a91927fa82b8a72f3797112fdf7f5f7078c2e42abdc27c136508f07a238b6b0",
+      "userId": "usr_1793809637973_2kzd4",
+      "expiresAt": 1796401637973
+    }
+  ]
+}

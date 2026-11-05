@@ -1,0 +1,164 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all (Pillar 1)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation for UserProfile (/users/{userId})
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'goalPullUps', 'goalPushUps', 'goalSitUps', 'goalRunningKm', 'createdAt', 'updatedAt']) &&
+        data.uid is string && data.uid.size() <= 128 && data.uid == request.auth.uid &&
+        data.email is string && data.email.size() <= 128 &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+        (!('goalPullUps' in data) || (data.goalPullUps is number && data.goalPullUps >= 0 && data.goalPullUps <= 100000)) &&
+        (!('goalPushUps' in data) || (data.goalPushUps is number && data.goalPushUps >= 0 && data.goalPushUps <= 100000)) &&
+        (!('goalSitUps' in data) || (data.goalSitUps is number && data.goalSitUps >= 0 && data.goalSitUps <= 100000)) &&
+        (!('goalRunningKm' in data) || (data.goalRunningKm is number && data.goalRunningKm >= 0 && data.goalRunningKm <= 100000));
+    }
+
+    // Validation for PublicProfile (/publicProfiles/{userId})
+    function isValidPublicProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName']) &&
+        data.keys().hasOnly(['uid', 'displayName', 'email', 'photoURL', 'updatedAt']) &&
+        data.uid is string && data.uid.size() <= 128 && data.uid == request.auth.uid &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+        (!('email' in data) || (data.email is string && data.email.size() <= 128)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500));
+    }
+
+    // Validation for ActivityLog (/activities/{activityId})
+    function isValidActivity(data) {
+      return data.keys().hasAll(['userId', 'date', 'pullUps', 'pushUps', 'sitUps', 'runningKm']) &&
+        data.keys().hasOnly(['userId', 'date', 'pullUps', 'pushUps', 'sitUps', 'runningKm', 'notes', 'createdAt', 'updatedAt']) &&
+        data.userId is string && data.userId.size() <= 128 && data.userId == request.auth.uid &&
+        data.date is string && data.date.size() == 10 && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+        data.pullUps is number && data.pullUps >= 0 && data.pullUps <= 10000 &&
+        data.pushUps is number && data.pushUps >= 0 && data.pushUps <= 20000 &&
+        data.sitUps is number && data.sitUps >= 0 && data.sitUps <= 20000 &&
+        data.runningKm is number && data.runningKm >= 0 && data.runningKm <= 500 &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 300));
+    }
+
+    // Validation for FriendConnection (/connections/{connectionId})
+    function isValidConnection(data) {
+      return data.keys().hasAll(['userA', 'userB', 'requesterId', 'targetId', 'participants', 'status']) &&
+        data.keys().hasOnly(['userA', 'userB', 'requesterId', 'targetId', 'requesterName', 'targetName', 'participants', 'status', 'createdAt', 'updatedAt']) &&
+        data.userA is string && data.userA.size() <= 128 &&
+        data.userB is string && data.userB.size() <= 128 &&
+        data.requesterId is string && data.requesterId.size() <= 128 &&
+        data.targetId is string && data.targetId.size() <= 128 &&
+        data.participants is list && data.participants.size() == 2 &&
+        data.participants.hasAll([data.userA, data.userB]) &&
+        data.status in ['pending', 'accepted', 'declined'] &&
+        (!('requesterName' in data) || (data.requesterName is string && data.requesterName.size() <= 100)) &&
+        (!('targetName' in data) || (data.targetName is string && data.targetName.size() <= 100));
+    }
+
+    // Validation for MonthlyProgress (/monthlyProgress/{progressId})
+    function isValidMonthlyProgress(data) {
+      return data.keys().hasAll(['userId', 'userName', 'year', 'month', 'pullUps', 'pushUps', 'sitUps', 'runningKm', 'viewers']) &&
+        data.keys().hasOnly(['userId', 'userName', 'year', 'month', 'pullUps', 'pushUps', 'sitUps', 'runningKm', 'viewers', 'updatedAt']) &&
+        data.userId is string && data.userId.size() <= 128 && data.userId == request.auth.uid &&
+        data.userName is string && data.userName.size() <= 100 &&
+        data.year is number && data.year >= 2020 && data.year <= 2100 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.pullUps is number && data.pullUps >= 0 &&
+        data.pushUps is number && data.pushUps >= 0 &&
+        data.sitUps is number && data.sitUps >= 0 &&
+        data.runningKm is number && data.runningKm >= 0 &&
+        data.viewers is list && data.viewers.size() <= 100;
+    }
+
+    // 1. Private User Profile
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow create: if isSignedIn() && isValidId(userId) && request.auth.uid == userId && isValidUserProfile(incoming());
+      allow update: if isSignedIn() && isValidId(userId) && request.auth.uid == userId &&
+        isValidUserProfile(incoming()) && incoming().uid == existing().uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'goalPullUps', 'goalPushUps', 'goalSitUps', 'goalRunningKm', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    // 2. Public Directory of Profiles (to search friends)
+    match /publicProfiles/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && request.auth.uid == userId && isValidPublicProfile(incoming());
+      allow update: if isSignedIn() && isValidId(userId) && request.auth.uid == userId &&
+        isValidPublicProfile(incoming()) && incoming().uid == existing().uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'photoURL', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    // 3. User Daily Activities (strictly isolated per user)
+    match /activities/{activityId} {
+      allow get: if isSignedIn() && isValidId(activityId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(activityId) && isValidActivity(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(activityId) && isValidActivity(incoming()) &&
+        existing().userId == request.auth.uid && incoming().userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['date', 'pullUps', 'pushUps', 'sitUps', 'runningKm', 'notes', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(activityId) && existing().userId == request.auth.uid;
+    }
+
+    // 4. Friend / Ranking Connections
+    match /connections/{connectionId} {
+      allow get: if isSignedIn() && isValidId(connectionId) && resource.data.participants.hasAny([request.auth.uid]);
+      allow list: if isSignedIn() && resource.data.participants.hasAny([request.auth.uid]);
+      allow create: if isSignedIn() && isValidId(connectionId) && isValidConnection(incoming()) &&
+        incoming().requesterId == request.auth.uid &&
+        incoming().status == 'pending' &&
+        incoming().participants.hasAny([request.auth.uid]);
+      allow update: if isSignedIn() && isValidId(connectionId) && isValidConnection(incoming()) &&
+        existing().participants.hasAny([request.auth.uid]) &&
+        incoming().userA == existing().userA &&
+        incoming().userB == existing().userB &&
+        incoming().requesterId == existing().requesterId &&
+        incoming().targetId == existing().targetId &&
+        incoming().participants == existing().participants &&
+        (
+          // Target accepts or declines
+          (existing().targetId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])) ||
+          // Sync names if updated
+          (incoming().diff(existing()).affectedKeys().hasOnly(['requesterName', 'targetName', 'updatedAt']))
+        );
+      allow delete: if isSignedIn() && isValidId(connectionId) && existing().participants.hasAny([request.auth.uid]);
+    }
+
+    // 5. Monthly Aggregates (Personal + Shared only with accepted friends in 'viewers')
+    match /monthlyProgress/{progressId} {
+      allow get: if isSignedIn() && isValidId(progressId) &&
+        (resource.data.userId == request.auth.uid || resource.data.viewers.hasAny([request.auth.uid]));
+      allow list: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || resource.data.viewers.hasAny([request.auth.uid]));
+      allow create: if isSignedIn() && isValidId(progressId) && isValidMonthlyProgress(incoming()) &&
+        incoming().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(progressId) && isValidMonthlyProgress(incoming()) &&
+        existing().userId == request.auth.uid && incoming().userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['userName', 'pullUps', 'pushUps', 'sitUps', 'runningKm', 'viewers', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(progressId) && existing().userId == request.auth.uid;
+    }
+  }
+}

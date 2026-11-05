@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with goals and metadata",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "goalPullUps": { "type": "number" },
+        "goalPushUps": { "type": "number" },
+        "goalSitUps": { "type": "number" },
+        "goalRunningKm": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "displayName"]
+    },
+    "PublicProfile": {
+      "title": "PublicProfile",
+      "description": "Public searchable user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "displayName"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Daily workout entry recorded by the user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 10 },
+        "pullUps": { "type": "number" },
+        "pushUps": { "type": "number" },
+        "sitUps": { "type": "number" },
+        "runningKm": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "date"]
+    },
+    "FriendConnection": {
+      "title": "FriendConnection",
+      "description": "Friendship/ranking connection request between two athletes",
+      "type": "object",
+      "properties": {
+        "userA": { "type": "string", "maxLength": 128 },
+        "userB": { "type": "string", "maxLength": 128 },
+        "requesterId": { "type": "string", "maxLength": 128 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "requesterName": { "type": "string", "maxLength": 100 },
+        "targetName": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userA", "userB", "requesterId", "targetId", "status"]
+    },
+    "MonthlyProgress": {
+      "title": "MonthlyProgress",
+      "description": "Aggregated monthly totals for ranking and comparison",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "year": { "type": "number" },
+        "month": { "type": "number" },
+        "pullUps": { "type": "number" },
+        "pushUps": { "type": "number" },
+        "sitUps": { "type": "number" },
+        "runningKm": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "year", "month"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private profile of the authenticated user"
+    },
+    "/publicProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/PublicProfile" },
+      "description": "Directory of athletes available for friend/ranking requests"
+    },
+    "/activities/{activityId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "Daily workout entries logged by individual users"
+    },
+    "/connections/{connectionId}": {
+      "schema": { "$ref": "#/entities/FriendConnection" },
+      "description": "Invitations and mutual ranking permissions between athletes"
+    },
+    "/monthlyProgress/{progressId}": {
+      "schema": { "$ref": "#/entities/MonthlyProgress" },
+      "description": "Monthly aggregates used for ranking comparison"
+    }
+  }
+}

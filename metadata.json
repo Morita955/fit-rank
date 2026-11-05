@@ -1,0 +1,6 @@
+{
+  "name": "FitRank - Desafio & Atividade Física",
+  "description": "Aplicativo de acompanhamento de atividades físicas diárias com metas mensais (barra fixa, flexão, abdominal, corrida), dashboard de progresso e ranking compartilhado entre amigos aprovados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

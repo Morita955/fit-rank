@@ -1,0 +1,8 @@
+{
+  "appId": "com.fitrank.app",
+  "appName": "FitRank",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
