@@ -1,0 +1,8 @@
+project_id = "fit-rank-project"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "auth", "storage"]
+
+[db]
+port = 54322
