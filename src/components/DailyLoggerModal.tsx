@@ -7,9 +7,7 @@ import {
   Calendar,
   CheckCircle2,
   Dumbbell,
-  Flame,
-  Footprints,
-  HeartPulse,
+  SlidersHorizontal,
   Sparkles,
   X,
 } from 'lucide-react';
@@ -27,7 +25,7 @@ export default function DailyLoggerModal({
   editingActivity,
   onSaved,
 }: DailyLoggerModalProps) {
-  const { user, profile } = useAuth();
+  const { user, profile, activeUserGoals } = useAuth();
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState<string>(editingActivity?.date || todayStr);
@@ -78,6 +76,19 @@ export default function DailyLoggerModal({
     setDate(new Date().toISOString().split('T')[0]);
   };
 
+  // Approximate impact calculation for the top banner
+  const impactScore = Math.round(
+    ((pullUps / (activeUserGoals.pullUps || 200)) * 25 +
+     (pushUps / (activeUserGoals.pushUps || 1000)) * 25 +
+     (sitUps / (activeUserGoals.sitUps || 500)) * 25 +
+     (runningKm / (activeUserGoals.runningKm || 50)) * 25) * 10
+  ) / 10;
+
+  const formattedDateLabel = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -105,7 +116,6 @@ export default function DailyLoggerModal({
         editingActivity?.id
       );
 
-      // Trigger celebratory confetti
       confetti({
         particleCount: 80,
         spread: 60,
@@ -117,93 +127,127 @@ export default function DailyLoggerModal({
       onClose();
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || 'Erro ao registrar treino. Verifique suas conexões.');
+      setError(err?.message || 'Erro ao registrar treino.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[94dvh] sm:max-h-[92vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-850 shrink-0">
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
-              <Dumbbell className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm sm:text-lg font-bold text-white">
-                {editingActivity ? 'Editar Atividade' : 'Informar Atividade do Dia'}
-              </h3>
-              <p className="text-[11px] sm:text-xs text-slate-400">
-                Seus dados são 100% privados até conexão com amigos.
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              aria-label="Voltar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <h3 className="text-base sm:text-lg font-black tracking-wide text-white">
+              {editingActivity ? 'Editar Registro' : 'Novo Registro'}
+            </h3>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0"
-            aria-label="Fechar"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="p-2 rounded-xl bg-slate-800 text-slate-300">
+            <SlidersHorizontal className="w-4 h-4" />
+          </div>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1 overscroll-contain">
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
               {error}
             </div>
           )}
 
-          {/* Date Picker & Quick Shortcuts */}
-          <div className="bg-slate-800/40 p-3 sm:p-3.5 rounded-xl border border-slate-700/60 space-y-2">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-blue-400" />
-              Data do Treino
-            </label>
+          {/* Date & Telemetry Status Banner */}
+          <div className="flex items-center justify-between bg-slate-850 p-3 sm:p-3.5 rounded-2xl border border-slate-800">
             <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 flex-1 min-w-0"
-              />
-              <button
-                type="button"
-                onClick={setToday}
-                className={`text-xs px-3 py-2 rounded-lg border font-semibold transition touch-manipulation shrink-0 ${
-                  date === todayStr
-                    ? 'bg-blue-600 text-white border-blue-500'
-                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                }`}
-              >
-                Hoje
-              </button>
-              <button
-                type="button"
-                onClick={setYesterday}
-                className="text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 font-semibold transition touch-manipulation shrink-0"
-              >
-                Ontem
-              </button>
+              <Calendar className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs sm:text-sm font-bold text-white capitalize">
+                Hoje, {formattedDateLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-extrabold tracking-wider uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Telemetria Ativa
             </div>
           </div>
 
-          {/* 4 Exercise Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+          {/* Impact on Monthly Goal Banner */}
+          <div className="bg-slate-850 p-3.5 sm:p-4 rounded-2xl border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                📈 Impacto na Meta Mensal
+              </span>
+              <span className="text-sm sm:text-base font-extrabold text-lime-400 font-mono">
+                +{impactScore}%
+              </span>
+            </div>
+            <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5">
+              <div
+                className="bg-gradient-to-r from-lime-500 to-emerald-400 h-full rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(100, impactScore * 5)}%` }}
+              ></div>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-400">
+              <span>Registro de hoje</span>
+              <span className="font-semibold text-slate-300">Progresso Dinâmico</span>
+            </div>
+          </div>
+
+          {/* Quick Date Selector */}
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="bg-slate-850 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 flex-1"
+            />
+            <button
+              type="button"
+              onClick={setToday}
+              className={`text-xs px-3 py-2 rounded-xl font-semibold transition ${
+                date === todayStr ? 'bg-blue-600 text-white shadow' : 'bg-slate-850 text-slate-300 border border-slate-800'
+              }`}
+            >
+              Hoje
+            </button>
+            <button
+              type="button"
+              onClick={setYesterday}
+              className="text-xs px-3 py-2 rounded-xl font-semibold bg-slate-850 text-slate-300 border border-slate-800 hover:bg-slate-800"
+            >
+              Ontem
+            </button>
+          </div>
+
+          {/* 4 Exercise Cards */}
+          <div className="space-y-3.5">
             {/* 1. Barra Fixa */}
-            <div className="bg-slate-800/60 p-3 sm:p-3.5 rounded-xl border border-slate-700 hover:border-blue-500/50 transition">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-blue-300 flex items-center gap-1">
-                  🏋️ Barra Fixa
-                </span>
-                <span className="text-[10px] text-slate-400">Meta: 200/mês</span>
+            <div className="bg-slate-850 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3 hover:border-blue-500/40 transition">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                    🏋️ Barra Fixa
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 tracking-wide font-medium uppercase mt-0.5">
+                    Força Dorsal & Pegada
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-bold">Meta Diária</span>
+                  <span className="text-xs font-black text-lime-400 font-mono">
+                    {Math.round((activeUserGoals.pullUps / 28))} reps
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mb-2">
+
+              <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -212,33 +256,44 @@ export default function DailyLoggerModal({
                   value={pullUps === 0 ? '' : pullUps}
                   onChange={(e) => setPullUps(Math.max(0, parseInt(e.target.value) || 0))}
                   placeholder="0"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 sm:py-2 text-base font-bold text-white focus:outline-none focus:border-blue-500"
+                  className="w-24 bg-transparent text-xl sm:text-2xl font-black text-white text-center focus:outline-none font-mono"
                 />
-                <span className="text-xs text-slate-400 font-medium">reps</span>
-              </div>
-              <div className="flex gap-1.5">
-                {[1, 5, 10, 20].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => handleQuickAdd(setPullUps, amt)}
-                    className="flex-1 py-1.5 sm:py-1 text-xs font-semibold bg-blue-500/10 hover:bg-blue-500/20 active:bg-blue-500/30 text-blue-300 rounded border border-blue-500/20 transition touch-manipulation"
-                  >
-                    +{amt}
-                  </button>
-                ))}
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">reps</span>
+                <div className="flex gap-1.5 ml-auto">
+                  {[1, 5, 10].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => handleQuickAdd(setPullUps, amt)}
+                      className="px-2.5 py-1.5 text-xs font-bold bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-500/30 transition active:scale-95"
+                    >
+                      +{amt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* 2. Flexões */}
-            <div className="bg-slate-800/60 p-3 sm:p-3.5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-emerald-300 flex items-center gap-1">
-                  🤸 Flexões
-                </span>
-                <span className="text-[10px] text-slate-400">Meta: 1000/mês</span>
+            <div className="bg-slate-850 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3 hover:border-emerald-500/40 transition">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                    🤸 Flexões
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 tracking-wide font-medium uppercase mt-0.5">
+                    Peitoral, Tríceps & Core
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-bold">Meta Diária</span>
+                  <span className="text-xs font-black text-cyan-400 font-mono">
+                    {Math.round((activeUserGoals.pushUps / 28))} reps
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mb-2">
+
+              <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -247,33 +302,44 @@ export default function DailyLoggerModal({
                   value={pushUps === 0 ? '' : pushUps}
                   onChange={(e) => setPushUps(Math.max(0, parseInt(e.target.value) || 0))}
                   placeholder="0"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 sm:py-2 text-base font-bold text-white focus:outline-none focus:border-emerald-500"
+                  className="w-24 bg-transparent text-xl sm:text-2xl font-black text-white text-center focus:outline-none font-mono"
                 />
-                <span className="text-xs text-slate-400 font-medium">reps</span>
-              </div>
-              <div className="flex gap-1.5">
-                {[5, 10, 25, 50].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => handleQuickAdd(setPushUps, amt)}
-                    className="flex-1 py-1.5 sm:py-1 text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 text-emerald-300 rounded border border-emerald-500/20 transition touch-manipulation"
-                  >
-                    +{amt}
-                  </button>
-                ))}
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">reps</span>
+                <div className="flex gap-1.5 ml-auto">
+                  {[5, 10, 25].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => handleQuickAdd(setPushUps, amt)}
+                      className="px-2.5 py-1.5 text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 rounded-lg border border-emerald-500/30 transition active:scale-95"
+                    >
+                      +{amt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* 3. Abdominais */}
-            <div className="bg-slate-800/60 p-3 sm:p-3.5 rounded-xl border border-slate-700 hover:border-cyan-500/50 transition">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-cyan-300 flex items-center gap-1">
-                  🧘 Abdominais
-                </span>
-                <span className="text-[10px] text-slate-400">Meta: 500/mês</span>
+            <div className="bg-slate-850 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3 hover:border-cyan-500/40 transition">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                    🧘 Abdominais
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 tracking-wide font-medium uppercase mt-0.5">
+                    Estabilidade & Lombar
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-bold">Meta Diária</span>
+                  <span className="text-xs font-black text-slate-300 font-mono">
+                    {Math.round((activeUserGoals.sitUps / 28))} reps
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mb-2">
+
+              <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -282,33 +348,41 @@ export default function DailyLoggerModal({
                   value={sitUps === 0 ? '' : sitUps}
                   onChange={(e) => setSitUps(Math.max(0, parseInt(e.target.value) || 0))}
                   placeholder="0"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 sm:py-2 text-base font-bold text-white focus:outline-none focus:border-cyan-500"
+                  className="w-24 bg-transparent text-xl sm:text-2xl font-black text-white text-center focus:outline-none font-mono"
                 />
-                <span className="text-xs text-slate-400 font-medium">reps</span>
-              </div>
-              <div className="flex gap-1.5">
-                {[10, 25, 50, 100].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => handleQuickAdd(setSitUps, amt)}
-                    className="flex-1 py-1.5 sm:py-1 text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 active:bg-cyan-500/30 text-cyan-300 rounded border border-cyan-500/20 transition touch-manipulation"
-                  >
-                    +{amt}
-                  </button>
-                ))}
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">reps</span>
+                <div className="flex gap-1.5 ml-auto">
+                  {[10, 25, 50].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => handleQuickAdd(setSitUps, amt)}
+                      className="px-2.5 py-1.5 text-xs font-bold bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 rounded-lg border border-cyan-500/30 transition active:scale-95"
+                    >
+                      +{amt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* 4. Corrida (KM) */}
-            <div className="bg-slate-800/60 p-3 sm:p-3.5 rounded-xl border border-slate-700 hover:border-orange-500/50 transition">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-orange-300 flex items-center gap-1">
-                  🏃 Corrida (KM)
-                </span>
-                <span className="text-[10px] text-slate-400">Meta: 50 km/mês</span>
+            <div className="bg-slate-850 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3 hover:border-orange-500/40 transition">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                    🏃 Corrida (KM)
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 tracking-wide font-medium uppercase mt-0.5">
+                    Cardio & Resistência Aeróbica
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 text-[10px] font-bold text-orange-400">
+                  <span>GPS / Strava</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mb-2">
+
+              <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                 <input
                   type="number"
                   inputMode="decimal"
@@ -318,26 +392,26 @@ export default function DailyLoggerModal({
                   value={runningKm === 0 ? '' : runningKm}
                   onChange={(e) => setRunningKm(Math.max(0, parseFloat(e.target.value) || 0))}
                   placeholder="0.0"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 sm:py-2 text-base font-bold text-white focus:outline-none focus:border-orange-500"
+                  className="w-24 bg-transparent text-xl sm:text-2xl font-black text-white text-center focus:outline-none font-mono"
                 />
-                <span className="text-xs text-slate-400 font-medium">km</span>
-              </div>
-              <div className="flex gap-1.5">
-                {[1, 2.5, 5, 10].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => handleQuickAdd(setRunningKm, amt)}
-                    className="flex-1 py-1.5 sm:py-1 text-xs font-semibold bg-orange-500/10 hover:bg-orange-500/20 active:bg-orange-500/30 text-orange-300 rounded border border-orange-500/20 transition touch-manipulation"
-                  >
-                    +{amt}k
-                  </button>
-                ))}
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">km</span>
+                <div className="flex gap-1.5 ml-auto">
+                  {[1, 2.5, 5].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => handleQuickAdd(setRunningKm, amt)}
+                      className="px-2.5 py-1.5 text-xs font-bold bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 rounded-lg border border-orange-500/30 transition active:scale-95"
+                    >
+                      +{amt}k
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Notes (Optional) */}
+          {/* Notes */}
           <div>
             <label className="text-xs font-medium text-slate-300 block mb-1">
               Observações / Notas do Treino (Opcional)
@@ -346,35 +420,20 @@ export default function DailyLoggerModal({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ex: Treino de alta intensidade, 5km na praia..."
+              placeholder="Ex: Treino de alta intensidade..."
               maxLength={200}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-850 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
             />
           </div>
 
-          {/* Buttons */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2.5 sm:gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="px-4 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800 transition"
-            >
-              Cancelar
-            </button>
+          {/* Submit Button */}
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 sm:flex-initial justify-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] flex items-center gap-2 disabled:opacity-50 touch-manipulation"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-blue-600/30 transition active:scale-[0.99] disabled:opacity-50"
             >
-              {loading ? (
-                <span>Salvando...</span>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{editingActivity ? 'Atualizar Treino' : 'Salvar Atividade'}</span>
-                </>
-              )}
+              {loading ? 'Salvando...' : editingActivity ? 'Atualizar Atividade' : 'Salvar Registro de Treino'}
             </button>
           </div>
         </form>
