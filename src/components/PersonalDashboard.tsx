@@ -268,7 +268,7 @@ export default function PersonalDashboard({
       {/* Summary KPI Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-800 text-center">
         <div className="p-1 sm:p-2">
-          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Média do Mês</p>
+          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Meta do Mês</p>
           <p className="text-xl sm:text-2xl font-bold text-blue-400">{averagePct}%</p>
         </div>
         <div className="p-1 sm:p-2 border-l border-slate-800">
