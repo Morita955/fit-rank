@@ -104,22 +104,7 @@ export default function RankingDashboard({
     return b.averageScore - a.averageScore;
   });
 
-  const monthsLabels = [
-    'dezembro',
-    'janeiro',
-    'fevereiro',
-    'março',
-    'abril',
-    'maio',
-    'junho',
-    'julho',
-    'agosto',
-    'setembro',
-    'outubro',
-    'novembro',
-  ];
-
-  // Helper to render an SVG Grouped Bar Chart exactly like the spreadsheet in the image
+  // Helper to render an SVG Line Chart fitting all 12 months perfectly on screen without horizontal scroll
   const renderSpreadsheetChart = (
     title: string,
     key: 'pullUps' | 'pushUps' | 'sitUps' | 'runningKm',
@@ -127,7 +112,6 @@ export default function RankingDashboard({
     unit: string,
     accentColor: string
   ) => {
-    // Determine max value for Y-axis scale
     let maxVal = goal * 1.25;
     multiMonthData.forEach((ath) => {
       ath.monthlyData.forEach((m) => {
@@ -136,21 +120,32 @@ export default function RankingDashboard({
       });
     });
 
-    const chartHeight = 230;
-    const chartWidth = 880;
+    const chartHeight = 220;
+    const chartWidth = 760;
     const paddingLeft = 45;
-    const paddingRight = 25;
+    const paddingRight = 20;
     const paddingTop = 25;
-    const paddingBottom = 35;
+    const paddingBottom = 30;
     const availableWidth = chartWidth - paddingLeft - paddingRight;
     const availableHeight = chartHeight - paddingTop - paddingBottom;
 
     const monthSlotWidth = availableWidth / 12;
-    const athleteCount = Math.max(1, multiMonthData.length);
-    const barWidth = Math.min(14, (monthSlotWidth - 8) / athleteCount);
-
-    // Goal Y line
     const goalY = paddingTop + availableHeight - (goal / maxVal) * availableHeight;
+
+    const monthsSequence = [
+      { m: 12, label: 'Dez' },
+      { m: 1, label: 'Jan' },
+      { m: 2, label: 'Fev' },
+      { m: 3, label: 'Mar' },
+      { m: 4, label: 'Abr' },
+      { m: 5, label: 'Mai' },
+      { m: 6, label: 'Jun' },
+      { m: 7, label: 'Jul' },
+      { m: 8, label: 'Ago' },
+      { m: 9, label: 'Set' },
+      { m: 10, label: 'Out' },
+      { m: 11, label: 'Nov' },
+    ];
 
     return (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl space-y-3">
@@ -173,7 +168,7 @@ export default function RankingDashboard({
             {multiMonthData.map((ath) => (
               <div key={ath.userId} className="flex items-center gap-1 font-medium">
                 <span
-                  className="w-2.5 h-2.5 rounded-sm inline-block shadow-sm shrink-0"
+                  className="w-2.5 h-2.5 rounded-full inline-block shadow-sm shrink-0"
                   style={{ backgroundColor: ath.color }}
                 ></span>
                 <span className={ath.isCurrentUser ? 'text-white font-bold' : 'text-slate-300'}>
@@ -184,138 +179,124 @@ export default function RankingDashboard({
           </div>
         </div>
 
-        {/* Mobile Swipe Hint */}
-        <div className="sm:hidden flex items-center justify-between text-[10px] text-blue-300/80 bg-blue-950/30 px-2.5 py-1 rounded-lg border border-blue-500/20">
-          <span>👉 Arraste para o lado para ver todos os meses</span>
-          <span className="font-mono text-slate-400">Dez ➔ Nov</span>
-        </div>
-
-        {/* Responsive SVG Chart with Touch Scroll */}
-        <div className="w-full overflow-x-auto touch-pan-x no-scrollbar">
-          <div className="min-w-[720px]">
-            <svg
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              className="w-full h-auto text-slate-400 font-sans select-none"
-            >
-              {/* Horizontal Grid lines */}
-              {[0, 0.25, 0.5, 0.75, 1].map((pct, idx) => {
-                const y = paddingTop + availableHeight * (1 - pct);
-                const val = Math.round(maxVal * pct);
-                return (
-                  <g key={idx}>
-                    <line
-                      x1={paddingLeft}
-                      y1={y}
-                      x2={chartWidth - paddingRight}
-                      y2={y}
-                      stroke="#334155"
-                      strokeDasharray={idx === 0 ? 'none' : '3,3'}
-                      strokeWidth={idx === 0 ? 1.5 : 0.8}
-                    />
-                    <text
-                      x={paddingLeft - 8}
-                      y={y + 4}
-                      textAnchor="end"
-                      fontSize="10"
-                      fill="#94a3b8"
-                      fontFamily="monospace"
-                    >
-                      {val}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* Goal Target Line (Red / Orange Dotted Line) */}
-              {goal <= maxVal && (
-                <g>
+        {/* Responsive SVG Line Chart */}
+        <div className="w-full">
+          <svg
+            viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+            className="w-full h-auto text-slate-400 font-sans select-none"
+          >
+            {/* Horizontal Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((pct, idx) => {
+              const y = paddingTop + availableHeight * (1 - pct);
+              const val = Math.round(maxVal * pct);
+              return (
+                <g key={idx}>
                   <line
                     x1={paddingLeft}
-                    y1={goalY}
+                    y1={y}
                     x2={chartWidth - paddingRight}
-                    y2={goalY}
-                    stroke="#ef4444"
-                    strokeWidth="1.5"
-                    strokeDasharray="4,4"
+                    y2={y}
+                    stroke="#334155"
+                    strokeDasharray={idx === 0 ? 'none' : '3,3'}
+                    strokeWidth={idx === 0 ? 1.5 : 0.8}
                   />
                   <text
-                    x={chartWidth - paddingRight}
-                    y={goalY - 5}
+                    x={paddingLeft - 8}
+                    y={y + 4}
                     textAnchor="end"
-                    fontSize="9"
-                    fill="#f87171"
-                    fontWeight="bold"
+                    fontSize="10"
+                    fill="#94a3b8"
+                    fontFamily="monospace"
                   >
-                    META: {goal} {unit}
+                    {val}
                   </text>
                 </g>
-              )}
+              );
+            })}
 
-              {/* Month Bars & Labels */}
-              {monthsLabels.map((mLabel, mIdx) => {
-                const monthNum = mIdx === 0 ? 12 : mIdx;
-                const slotCenterX = paddingLeft + mIdx * monthSlotWidth + monthSlotWidth / 2;
-                const totalBarsWidth = athleteCount * barWidth;
-                const startX = slotCenterX - totalBarsWidth / 2;
+            {/* Goal Target Line */}
+            {goal <= maxVal && (
+              <g>
+                <line
+                  x1={paddingLeft}
+                  y1={goalY}
+                  x2={chartWidth - paddingRight}
+                  y2={goalY}
+                  stroke="#ef4444"
+                  strokeWidth="1.5"
+                  strokeDasharray="4,4"
+                />
+                <text
+                  x={chartWidth - paddingRight}
+                  y={goalY - 5}
+                  textAnchor="end"
+                  fontSize="9"
+                  fill="#f87171"
+                  fontWeight="bold"
+                >
+                  META: {goal} {unit}
+                </text>
+              </g>
+            )}
 
-                return (
-                  <g key={mLabel}>
-                    {/* Month Label */}
-                    <text
-                      x={slotCenterX}
-                      y={chartHeight - 10}
-                      textAnchor="middle"
-                      fontSize="10"
-                      fill="#94a3b8"
-                      className="capitalize"
-                    >
-                      {mLabel.slice(0, 3)}
-                    </text>
+            {/* Month X Labels */}
+            {monthsSequence.map((mSeq, mIdx) => {
+              const x = paddingLeft + mIdx * monthSlotWidth + monthSlotWidth / 2;
+              return (
+                <text
+                  key={mSeq.m}
+                  x={x}
+                  y={chartHeight - 8}
+                  textAnchor="middle"
+                  fontSize="10"
+                  fill="#94a3b8"
+                  fontWeight="bold"
+                >
+                  {mSeq.label}
+                </text>
+              );
+            })}
 
-                    {/* Bars for each athlete */}
-                    {multiMonthData.map((athlete, aIdx) => {
-                      const mData = athlete.monthlyData.find((d) => d.month === monthNum);
-                      const val = mData ? mData[key] : 0;
-                      const barHeight = val > 0 ? (val / maxVal) * availableHeight : 2;
-                      const x = startX + aIdx * barWidth;
-                      const y = paddingTop + availableHeight - barHeight;
+            {/* Lines and points for each athlete */}
+            {multiMonthData.map((athlete) => {
+              const points = monthsSequence.map((mSeq, mIdx) => {
+                const mData = athlete.monthlyData.find((d) => d.month === mSeq.m);
+                const val = mData ? mData[key] : 0;
+                const x = paddingLeft + mIdx * monthSlotWidth + monthSlotWidth / 2;
+                const y = paddingTop + availableHeight - (val / maxVal) * availableHeight;
+                return { x, y, val, label: mSeq.label };
+              });
 
-                      return (
-                        <g key={athlete.userId}>
-                          <rect
-                            x={x}
-                            y={y}
-                            width={barWidth - 2}
-                            height={barHeight}
-                            fill={val > 0 ? athlete.color : '#334155'}
-                            rx="1.5"
-                            className="transition-all hover:opacity-80 cursor-pointer"
-                          >
-                            <title>{`${athlete.userName} (${mLabel}): ${val} ${unit}`}</title>
-                          </rect>
+              const pathString = points.reduce((acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`), '');
 
-                          {/* Data label above bar if non-zero */}
-                          {val > 0 && (
-                            <text
-                              x={x + (barWidth - 2) / 2}
-                              y={y - 4}
-                              textAnchor="middle"
-                              fontSize="9"
-                              fill="#f1f5f9"
-                              fontWeight="bold"
-                              fontFamily="sans-serif"
-                            >
-                              {val}
-                            </text>
-                          )}
-                        </g>
-                      );
-                    })}
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
+              return (
+                <g key={athlete.userId}>
+                  <path
+                    d={pathString}
+                    fill="none"
+                    stroke={athlete.color}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {points.map((p, idx) => (
+                    <g key={idx}>
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={athlete.isCurrentUser ? '4' : '3'}
+                        fill={athlete.color}
+                        stroke="#0f172a"
+                        strokeWidth="1.5"
+                      >
+                        <title>{`${athlete.userName} (${p.label}): ${p.val} ${unit}`}</title>
+                      </circle>
+                    </g>
+                  ))}
+                </g>
+              );
+            })}
+          </svg>
         </div>
       </div>
     );
@@ -339,7 +320,6 @@ export default function RankingDashboard({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 animate-in fade-in duration-150">
         {exercises.map((ex) => {
-          // Sort ranking by this exercise
           const sorted = [...rankingList].sort((a, b) => (b[ex.key] as number) - (a[ex.key] as number));
 
           return (
@@ -389,7 +369,6 @@ export default function RankingDashboard({
                         </div>
                       </div>
 
-                      {/* Progress bar */}
                       <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5">
                         <div
                           className="h-full rounded-full transition-all duration-300"
@@ -449,7 +428,7 @@ export default function RankingDashboard({
         </div>
       </div>
 
-      {/* Filter Tabs for Ranking Podium (Scrollable on mobile) */}
+      {/* Filter Tabs for Ranking Podium */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 max-w-full">
           <button
@@ -538,7 +517,7 @@ export default function RankingDashboard({
         </div>
       </div>
 
-      {/* Podium Cards for Top 3 (Responsive grid on phones) */}
+      {/* Podium Cards for Top 3 */}
       {sortedRanking.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
           {sortedRanking.slice(0, 3).map((ath, index) => {
@@ -587,7 +566,6 @@ export default function RankingDashboard({
                   </div>
                 </div>
 
-                {/* 4 Numbers */}
                 <div className="grid grid-cols-4 gap-1 bg-slate-850 p-2 sm:p-2.5 rounded-xl border border-slate-800 text-center text-[11px] sm:text-xs">
                   <div>
                     <p className="text-[9px] text-slate-400">Barra</p>
@@ -612,14 +590,13 @@ export default function RankingDashboard({
         </div>
       )}
 
-      {/* Leaderboard: Mobile Cards + Desktop Table */}
+      {/* Leaderboard Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl">
         <h3 className="text-sm sm:text-base font-bold text-white mb-3 flex items-center gap-2">
           <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
           <span>Classificação - {monthObj.label} / {selectedYear}</span>
         </h3>
 
-        {/* MOBILE ATHLETE CARDS (Phones < 640px) */}
         <div className="sm:hidden space-y-2">
           {sortedRanking.map((ath, idx) => (
             <div
@@ -649,22 +626,21 @@ export default function RankingDashboard({
                   {ath.averageScore}%
                 </span>
               </div>
-
-              <div className="grid grid-cols-4 gap-1 text-center bg-slate-900/60 p-1.5 rounded-lg text-[10px]">
+              <div className="grid grid-cols-4 gap-1 text-center text-[11px] bg-slate-900 p-2 rounded-lg">
                 <div>
-                  <span className="text-slate-400 block text-[9px]">Barra</span>
+                  <span className="text-[9px] text-slate-400 block">Barra</span>
                   <span className="font-bold text-blue-400">{ath.pullUps}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px]">Flexão</span>
+                  <span className="text-[9px] text-slate-400 block">Flexão</span>
                   <span className="font-bold text-emerald-400">{ath.pushUps}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px]">Abdom.</span>
+                  <span className="text-[9px] text-slate-400 block">Abdom.</span>
                   <span className="font-bold text-cyan-400">{ath.sitUps}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px]">Corrida</span>
+                  <span className="text-[9px] text-slate-400 block">Corrida</span>
                   <span className="font-bold text-orange-400">{ath.runningKm}k</span>
                 </div>
               </div>
@@ -672,62 +648,44 @@ export default function RankingDashboard({
           ))}
         </div>
 
-        {/* DESKTOP TABLE (>= 640px) */}
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-850 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-              <tr>
-                <th className="py-2.5 px-3 text-center">Pos</th>
-                <th className="py-2.5 px-3">Atleta</th>
-                <th className="py-2.5 px-3 text-center">🏋️ Barra (200)</th>
-                <th className="py-2.5 px-3 text-center">🤸 Flexão (1000)</th>
-                <th className="py-2.5 px-3 text-center">🧘 Abdominal (500)</th>
-                <th className="py-2.5 px-3 text-center">🏃 Corrida (50km)</th>
-                <th className="py-2.5 px-3 text-center">Pontuação</th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <th className="py-3 px-3 w-16">Pos</th>
+                <th className="py-3 px-3">Atleta</th>
+                <th className="py-3 px-3 text-center">Barra Fixa</th>
+                <th className="py-3 px-3 text-center">Flexões</th>
+                <th className="py-3 px-3 text-center">Abdominais</th>
+                <th className="py-3 px-3 text-center">Corrida</th>
+                <th className="py-3 px-3 text-right">Média / Pontos</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300 font-medium">
+            <tbody className="divide-y divide-slate-800/60 text-xs text-slate-200">
               {sortedRanking.map((ath, idx) => (
-                <tr
-                  key={ath.userId}
-                  className={`hover:bg-slate-800/40 transition ${
-                    ath.isCurrentUser ? 'bg-blue-600/5 font-semibold text-white' : ''
-                  }`}
-                >
-                  <td className="py-3 px-3 text-center font-bold">
+                <tr key={ath.userId} className={`hover:bg-slate-850/60 transition ${ath.isCurrentUser ? 'bg-blue-600/5 font-semibold' : ''}`}>
+                  <td className="py-3 px-3 font-extrabold text-amber-400">
                     {idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : `${idx + 1}º`}
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="w-6 h-6 rounded-full text-white font-bold flex items-center justify-center text-[11px]"
+                        className="w-7 h-7 rounded-full text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0"
                         style={{ backgroundColor: ath.color }}
                       >
                         {ath.userName?.[0] || 'A'}
                       </div>
-                      <span className={ath.isCurrentUser ? 'text-blue-300 font-bold' : 'text-slate-200'}>
-                        {ath.userName} {ath.isCurrentUser && '(Você)'}
+                      <span className="text-white font-bold">
+                        {ath.userName} {ath.isCurrentUser && <span className="text-blue-400 font-normal">(Você)</span>}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="font-bold text-blue-400">{ath.pullUps}</span>
-                    <span className="text-[10px] text-slate-500 block">({ath.pctPullUps}%)</span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="font-bold text-emerald-400">{ath.pushUps}</span>
-                    <span className="text-[10px] text-slate-500 block">({ath.pctPushUps}%)</span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="font-bold text-cyan-400">{ath.sitUps}</span>
-                    <span className="text-[10px] text-slate-500 block">({ath.pctSitUps}%)</span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="font-bold text-orange-400">{ath.runningKm} km</span>
-                    <span className="text-[10px] text-slate-500 block">({ath.pctRunningKm}%)</span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="px-2 py-1 rounded bg-slate-800 text-amber-300 font-bold border border-slate-700">
+                  <td className="py-3 px-3 text-center font-bold text-blue-400">{ath.pullUps}</td>
+                  <td className="py-3 px-3 text-center font-bold text-emerald-400">{ath.pushUps}</td>
+                  <td className="py-3 px-3 text-center font-bold text-cyan-400">{ath.sitUps}</td>
+                  <td className="py-3 px-3 text-center font-bold text-orange-400">{ath.runningKm} km</td>
+                  <td className="py-3 px-3 text-right">
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-amber-300 font-bold border border-slate-700">
                       {ath.averageScore}%
                     </span>
                   </td>
@@ -738,77 +696,29 @@ export default function RankingDashboard({
         </div>
       </div>
 
-      {/* The 4 Grouped Bar Charts */}
-      <div className="space-y-4 sm:space-y-6 pt-2">
-        <div>
-          <h3 className="text-sm sm:text-lg font-extrabold text-white flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-            <span>Gráficos Comparativos da Planilha</span>
-          </h3>
-          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-            Evolução mensal entre atletas conectados (Dezembro a Novembro)
-          </p>
+      {/* Spreadsheet Style Multi-Month Comparison Charts */}
+      {(chartViewMode === 'stacked' || chartViewMode === 'single') && (
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-400" />
+              <span>Evolução Anual (Dez a Nov) - Gráficos de Linha</span>
+            </h3>
+          </div>
+
+          {(chartViewMode === 'stacked' || chartViewMode === 'single') && (
+            <div className="space-y-5">
+              {renderSpreadsheetChart('Barra Fixa', 'pullUps', activeUserGoals.pullUps || 200, 'reps', '#2563eb')}
+              {renderSpreadsheetChart('Flexões', 'pushUps', activeUserGoals.pushUps || 1000, 'reps', '#10b981')}
+              {renderSpreadsheetChart('Abdominais', 'sitUps', activeUserGoals.sitUps || 500, 'reps', '#06b6d4')}
+              {renderSpreadsheetChart('Corrida (KM)', 'runningKm', activeUserGoals.runningKm || 50, 'km', '#f97316')}
+            </div>
+          )}
         </div>
+      )}
 
-        {chartViewMode === 'month_focus' ? (
-          <div className="space-y-3">
-            <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-2.5 text-xs text-slate-300 flex items-center justify-between">
-              <span>Visão direta do mês selecionado: <strong className="text-white">{monthObj.label} / {selectedYear}</strong></span>
-              <span className="text-[11px] text-blue-400 font-semibold">100% Mobile</span>
-            </div>
-            {renderMonthFocusComparison()}
-          </div>
-        ) : chartViewMode === 'stacked' ? (
-          <div className="space-y-4 sm:space-y-6">
-            {renderSpreadsheetChart('BARRA FIXA', 'pullUps', 200, 'reps', '#2563eb')}
-            {renderSpreadsheetChart('FLEXÕES', 'pushUps', 1000, 'reps', '#10b981')}
-            {renderSpreadsheetChart('ABDOMINAIS', 'sitUps', 500, 'reps', '#06b6d4')}
-            {renderSpreadsheetChart('CORRIDA (KM)', 'runningKm', 50, 'km', '#f97316')}
-          </div>
-        ) : (
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-              <button
-                onClick={() => setActiveChart('pullUps')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition ${
-                  activeChart === 'pullUps' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Barra Fixa
-              </button>
-              <button
-                onClick={() => setActiveChart('pushUps')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition ${
-                  activeChart === 'pushUps' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Flexões
-              </button>
-              <button
-                onClick={() => setActiveChart('sitUps')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition ${
-                  activeChart === 'sitUps' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Abdominais
-              </button>
-              <button
-                onClick={() => setActiveChart('runningKm')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition ${
-                  activeChart === 'runningKm' ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Corrida (KM)
-              </button>
-            </div>
-
-            {activeChart === 'pullUps' && renderSpreadsheetChart('BARRA FIXA', 'pullUps', 200, 'reps', '#2563eb')}
-            {activeChart === 'pushUps' && renderSpreadsheetChart('FLEXÕES', 'pushUps', 1000, 'reps', '#10b981')}
-            {activeChart === 'sitUps' && renderSpreadsheetChart('ABDOMINAIS', 'sitUps', 500, 'reps', '#06b6d4')}
-            {activeChart === 'runningKm' && renderSpreadsheetChart('CORRIDA (KM)', 'runningKm', 50, 'km', '#f97316')}
-          </div>
-        )}
-      </div>
+      {/* Month Focus Comparison View */}
+      {chartViewMode === 'month_focus' && renderMonthFocusComparison()}
     </div>
   );
 }

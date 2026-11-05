@@ -61,6 +61,39 @@ export default function PersonalDashboard({
   // Active workout days
   const uniqueDays = new Set(activities.map((a) => a.date)).size;
 
+  // Longest consecutive streak of active days in the month
+  const activeDates = Array.from(new Set(activities.map((a) => a.date))).sort();
+  let longestStreak = 0;
+  let currentStreak = 0;
+  let prevDate: Date | null = null;
+
+  activeDates.forEach((dateStr) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    if (!prevDate) {
+      currentStreak = 1;
+    } else {
+      const diffTime = d.getTime() - prevDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+      if (diffDays === 1) {
+        currentStreak++;
+      } else {
+        currentStreak = 1;
+      }
+    }
+    prevDate = d;
+    if (currentStreak > longestStreak) {
+      longestStreak = currentStreak;
+    }
+  });
+  if (activeDates.length > 0 && longestStreak === 0) longestStreak = 1;
+
+  // Completed goals count (0/4 to 4/4)
+  let completedGoalsCount = 0;
+  if (pctPullUps >= 100) completedGoalsCount++;
+  if (pctPushUps >= 100) completedGoalsCount++;
+  if (pctSitUps >= 100) completedGoalsCount++;
+  if (pctRunningKm >= 100) completedGoalsCount++;
+
   const handleDelete = async (activity: ActivityLog) => {
     if (!user || !activity.id) return;
     if (window.confirm(`Deseja excluir o registro do dia ${activity.date}?`)) {
@@ -266,7 +299,7 @@ export default function PersonalDashboard({
       </div>
 
       {/* Summary KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-800 text-center">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-800 text-center">
         <div className="p-1 sm:p-2">
           <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Meta do Mês</p>
           <p className="text-xl sm:text-2xl font-bold text-blue-400">{averagePct}%</p>
@@ -275,13 +308,13 @@ export default function PersonalDashboard({
           <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Dias Ativos</p>
           <p className="text-xl sm:text-2xl font-bold text-emerald-400">{uniqueDays} dias</p>
         </div>
-        <div className="p-1 sm:p-2 border-t sm:border-t-0 sm:border-l border-slate-800">
-          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Repetições</p>
-          <p className="text-xl sm:text-2xl font-bold text-cyan-400">{totalPullUps + totalPushUps + totalSitUps}</p>
+        <div className="p-1 sm:p-2 border-l border-slate-800">
+          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Maior Sequência</p>
+          <p className="text-xl sm:text-2xl font-bold text-amber-400">{longestStreak} dias</p>
         </div>
-        <div className="p-1 sm:p-2 border-t sm:border-t-0 border-l border-slate-800">
-          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Distância</p>
-          <p className="text-xl sm:text-2xl font-bold text-orange-400">{totalRunningKm} km</p>
+        <div className="p-1 sm:p-2 border-t sm:border-t-0 sm:border-l border-slate-800 col-span-3 sm:col-span-1">
+          <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1">Metas Concluídas</p>
+          <p className="text-xl sm:text-2xl font-bold text-purple-400">{completedGoalsCount}/4</p>
         </div>
       </div>
 
@@ -299,154 +332,129 @@ export default function PersonalDashboard({
           </div>
           <button
             onClick={openNewActivityModal}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl transition shadow shadow-blue-600/20"
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow"
           >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>Treino</span>
+            <Plus className="w-4 h-4" />
+            <span>Adicionar</span>
           </button>
         </div>
 
         {activities.length === 0 ? (
-          <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-800 bg-slate-850/50">
-            <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-2 border border-blue-500/20">
-              <Dumbbell className="w-5 h-5" />
+          <div className="text-center py-10 bg-slate-850/50 rounded-xl border border-slate-800/80 p-6">
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3 border border-blue-500/20">
+              <Dumbbell className="w-6 h-6" />
             </div>
-            <h4 className="text-xs sm:text-sm font-semibold text-white mb-1">Nenhum treino registrado neste mês</h4>
-            <p className="text-[11px] text-slate-400 max-w-md mx-auto mb-3">
-              Informe suas repetições de barra, flexão, abdominal ou corrida para acompanhar o progresso!
+            <p className="text-sm font-bold text-slate-200 mb-1">Nenhum treino registrado neste mês</p>
+            <p className="text-xs text-slate-400 mb-4">
+              Informe suas atividades diárias para preencher o progresso e as metas.
             </p>
             <button
               onClick={openNewActivityModal}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition hover:scale-[1.02]"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Registrar Treino</span>
+              <Plus className="w-4 h-4" />
+              <span>Informar Atividade de Hoje</span>
             </button>
           </div>
         ) : (
-          <>
-            {/* MOBILE CARD VIEW (Phones < 640px) */}
-            <div className="sm:hidden space-y-2.5">
-              {activities.map((act) => {
-                const [y, m, d] = act.date.split('-');
-                const formattedDate = `${d}/${m}/${y}`;
-                return (
-                  <div key={act.id} className="bg-slate-850 p-3 rounded-xl border border-slate-800 space-y-2 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                      <span className="font-bold text-white text-xs flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                        {formattedDate}
-                      </span>
-                      <div className="flex items-center gap-1">
+          <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <table className="w-full text-left border-collapse hidden sm:table">
+              <thead>
+                <tr className="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="py-3 px-3">Data</th>
+                  <th className="py-3 px-3">Barra Fixa</th>
+                  <th className="py-3 px-3">Flexões</th>
+                  <th className="py-3 px-3">Abdominais</th>
+                  <th className="py-3 px-3">Corrida</th>
+                  <th className="py-3 px-3">Observações</th>
+                  <th className="py-3 px-3 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-xs text-slate-200">
+                {activities.map((act) => (
+                  <tr key={act.id} className="hover:bg-slate-850/60 transition group">
+                    <td className="py-3 px-3 font-mono font-bold text-white whitespace-nowrap">
+                      {act.date.split('-').reverse().join('/')}
+                    </td>
+                    <td className="py-3 px-3 font-semibold text-blue-400">{act.pullUps} reps</td>
+                    <td className="py-3 px-3 font-semibold text-emerald-400">{act.pushUps} reps</td>
+                    <td className="py-3 px-3 font-semibold text-cyan-400">{act.sitUps} reps</td>
+                    <td className="py-3 px-3 font-semibold text-orange-400">{act.runningKm} km</td>
+                    <td className="py-3 px-3 text-slate-400 max-w-xs truncate">{act.notes || '—'}</td>
+                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition">
                         <button
                           onClick={() => onEditActivity(act)}
-                          className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-750 transition"
-                          title="Editar treino"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                          title="Editar"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(act)}
-                          className="p-1 rounded text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
-                          title="Excluir treino"
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition"
+                          title="Excluir"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-1.5 text-center bg-slate-900/70 p-2 rounded-lg text-xs font-semibold">
-                      <div>
-                        <span className="text-[9px] text-slate-400 block font-normal">Barra</span>
-                        <span className="text-blue-400 font-bold">{act.pullUps > 0 ? act.pullUps : '-'}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-slate-400 block font-normal">Flexão</span>
-                        <span className="text-emerald-400 font-bold">{act.pushUps > 0 ? act.pushUps : '-'}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-slate-400 block font-normal">Abdom.</span>
-                        <span className="text-cyan-400 font-bold">{act.sitUps > 0 ? act.sitUps : '-'}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-slate-400 block font-normal">Corrida</span>
-                        <span className="text-orange-400 font-bold">{act.runningKm > 0 ? `${act.runningKm}k` : '-'}</span>
-                      </div>
-                    </div>
-
-                    {act.notes && (
-                      <p className="text-[11px] text-slate-400 truncate italic px-0.5">
-                        "{act.notes}"
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* DESKTOP TABLE VIEW (>= 640px) */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-850 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th className="py-3 px-3">Data</th>
-                    <th className="py-3 px-3 text-center">🏋️ Barra Fixa</th>
-                    <th className="py-3 px-3 text-center">🤸 Flexões</th>
-                    <th className="py-3 px-3 text-center">🧘 Abdominais</th>
-                    <th className="py-3 px-3 text-center">🏃 Corrida (KM)</th>
-                    <th className="py-3 px-3">Observações</th>
-                    <th className="py-3 px-3 text-right">Ações</th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300 font-medium">
-                  {activities.map((act) => {
-                    const [y, m, d] = act.date.split('-');
-                    const formattedDate = `${d}/${m}/${y}`;
-                    return (
-                      <tr key={act.id} className="hover:bg-slate-800/40 transition">
-                        <td className="py-3 px-3 whitespace-nowrap text-white font-semibold">
-                          {formattedDate}
-                        </td>
-                        <td className="py-3 px-3 text-center font-bold text-blue-400">
-                          {act.pullUps > 0 ? act.pullUps : '-'}
-                        </td>
-                        <td className="py-3 px-3 text-center font-bold text-emerald-400">
-                          {act.pushUps > 0 ? act.pushUps : '-'}
-                        </td>
-                        <td className="py-3 px-3 text-center font-bold text-cyan-400">
-                          {act.sitUps > 0 ? act.sitUps : '-'}
-                        </td>
-                        <td className="py-3 px-3 text-center font-bold text-orange-400">
-                          {act.runningKm > 0 ? `${act.runningKm} km` : '-'}
-                        </td>
-                        <td className="py-3 px-3 text-slate-400 max-w-[200px] truncate text-[11px]">
-                          {act.notes || <span className="text-slate-600">-</span>}
-                        </td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => onEditActivity(act)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                              title="Editar treino"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(act)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
-                              title="Excluir treino"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-2.5">
+              {activities.map((act) => (
+                <div key={act.id} className="bg-slate-850 border border-slate-800 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span className="font-mono font-bold text-xs text-white">
+                      📅 {act.date.split('-').reverse().join('/')}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onEditActivity(act)}
+                        className="p-1 rounded bg-slate-800 text-slate-300"
+                        title="Editar"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(act)}
+                        className="p-1 rounded bg-red-500/10 text-red-400"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                    <div className="bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/20 text-blue-300">
+                      🏋️ Barra: <span className="font-bold">{act.pullUps}</span>
+                    </div>
+                    <div className="bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 text-emerald-300">
+                      🤸 Flexão: <span className="font-bold">{act.pushUps}</span>
+                    </div>
+                    <div className="bg-cyan-500/10 px-2.5 py-1 rounded border border-cyan-500/20 text-cyan-300">
+                      🧘 Abdom: <span className="font-bold">{act.sitUps}</span>
+                    </div>
+                    <div className="bg-orange-500/10 px-2.5 py-1 logged-item px-2.5 py-1 rounded border border-orange-500/20 text-orange-300">
+                      🏃 Corrida: <span className="font-bold">{act.runningKm}k</span>
+                    </div>
+                  </div>
+
+                  {act.notes && (
+                    <p className="text-[11px] text-slate-400 italic bg-slate-900/50 p-2 rounded">
+                      💬 "{act.notes}"
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
