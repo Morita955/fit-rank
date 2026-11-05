@@ -1,18 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-project-id.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = Boolean(
-  import.meta.env.VITE_SUPABASE_URL &&
-  import.meta.env.VITE_SUPABASE_ANON_KEY &&
-  import.meta.env.VITE_SUPABASE_URL !== 'https://your-supabase-project-id.supabase.co'
+  rawUrl &&
+  rawKey &&
+  !rawUrl.includes('seu-projeto') &&
+  !rawUrl.includes('your-supabase') &&
+  rawUrl.startsWith('https://')
 );
+
+const supabaseUrl = isSupabaseConfigured ? rawUrl : 'https://fitrank-demo.supabase.co';
+const supabaseAnonKey = isSupabaseConfigured ? rawKey : 'fitrank-demo-key';
 
 if (!isSupabaseConfigured) {
   console.warn(
-    '⚠️ Supabase URL ou Anon Key não foram configurados no arquivo .env.\n' +
-    'Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY ao seu arquivo .env para conectar ao seu banco Supabase.'
+    '⚠️ Supabase não configurado com credenciais válidas.\n' +
+    'Modo local ativo: Seus treinos e metas serão salvos no armazenamento local do seu dispositivo.'
   );
 }
 
