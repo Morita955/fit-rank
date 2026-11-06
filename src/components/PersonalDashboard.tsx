@@ -128,44 +128,44 @@ export default function PersonalDashboard({
       </div>
 
       {/* Main Goal Cards Grid (2x2 on mobile, 4 in a row on desktop) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* 1. Barra Fixa */}
-        <div className={`bg-slate-900 border rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden transition group ${
+        <div className={`bg-slate-900 border rounded-2xl p-3 sm:p-5 shadow-xl relative overflow-hidden transition group ${
           pctPullUps >= 100 ? 'border-lime-400/50 shadow-lime-500/10' : 'border-slate-800'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <span className="text-[11px] sm:text-xs font-black text-slate-300 uppercase tracking-wider truncate">
               Barra Fixa
             </span>
-            <span className={`text-xs font-black px-2.5 py-1 rounded-xl font-mono ${
+            <span className={`text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 rounded-xl font-mono shrink-0 ${
               pctPullUps >= 100 ? 'bg-lime-400/20 text-lime-300 border border-lime-400/40' : 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
             }`}>
               {pctPullUps >= 100 ? `✓ ${pctPullUps}%` : `${pctPullUps}%`}
             </span>
           </div>
 
-          <div className="mb-3">
-            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+          <div className="mb-2 sm:mb-3">
+            <div className="text-xl sm:text-3xl font-black text-white font-mono tracking-tight">
               <span className={pctPullUps >= 100 ? 'text-lime-400' : 'text-white'}>{totalPullUps}</span>
-              <span className="text-sm sm:text-base font-semibold text-slate-400 ml-1.5">/ {activeUserGoals.pullUps} reps</span>
+              <span className="text-xs sm:text-base font-semibold text-slate-400 ml-1">/ {activeUserGoals.pullUps}</span>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-3">
+          <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-2 sm:mb-3">
             <div
               className="bg-gradient-to-r from-lime-500 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-lime-500/40"
               style={{ width: `${Math.min(100, pctPullUps)}%` }}
             ></div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-semibold pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold pt-1.5 border-t border-slate-800/80">
             {pctPullUps >= 100 ? (
-              <span className="text-lime-400 flex items-center gap-1">
-                🎉 Meta batida! <span className="text-white font-mono">+{totalPullUps - activeUserGoals.pullUps} reps</span>
+              <span className="text-lime-400 flex items-center gap-1 truncate">
+                🎉 Meta batida! <span className="text-white font-mono hidden sm:inline">+{totalPullUps - activeUserGoals.pullUps} reps</span>
               </span>
             ) : (
-              <span className="text-slate-400">
+              <span className="text-slate-400 truncate">
                 Restam <span className="text-slate-200 font-mono font-bold">{Math.max(0, activeUserGoals.pullUps - totalPullUps)}</span> reps
               </span>
             )}
@@ -173,42 +173,42 @@ export default function PersonalDashboard({
         </div>
 
         {/* 2. Flexões */}
-        <div className={`bg-slate-900 border rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden transition group ${
+        <div className={`bg-slate-900 border rounded-2xl p-3 sm:p-5 shadow-xl relative overflow-hidden transition group ${
           pctPushUps >= 100 ? 'border-cyan-400/50 shadow-cyan-500/10' : 'border-slate-800'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <span className="text-[11px] sm:text-xs font-black text-slate-300 uppercase tracking-wider truncate">
               Flexões
             </span>
-            <span className={`text-xs font-black px-2.5 py-1 rounded-xl font-mono ${
+            <span className={`text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 rounded-xl font-mono shrink-0 ${
               pctPushUps >= 100 ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/40' : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
             }`}>
               {pctPushUps >= 100 ? `✓ ${pctPushUps}%` : `${pctPushUps}%`}
             </span>
           </div>
 
-          <div className="mb-3">
-            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+          <div className="mb-2 sm:mb-3">
+            <div className="text-xl sm:text-3xl font-black text-white font-mono tracking-tight">
               <span className={pctPushUps >= 100 ? 'text-cyan-400' : 'text-white'}>{totalPushUps}</span>
-              <span className="text-sm sm:text-base font-semibold text-slate-400 ml-1.5">/ {activeUserGoals.pushUps}</span>
+              <span className="text-xs sm:text-base font-semibold text-slate-400 ml-1">/ {activeUserGoals.pushUps}</span>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-3">
+          <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-2 sm:mb-3">
             <div
               className="bg-gradient-to-r from-cyan-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/40"
               style={{ width: `${Math.min(100, pctPushUps)}%` }}
             ></div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-semibold pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold pt-1.5 border-t border-slate-800/80">
             {pctPushUps >= 100 ? (
-              <span className="text-cyan-400 flex items-center gap-1">
-                🎉 Meta batida! <span className="text-white font-mono">+{totalPushUps - activeUserGoals.pushUps} reps</span>
+              <span className="text-cyan-400 flex items-center gap-1 truncate">
+                🎉 Meta batida! <span className="text-white font-mono hidden sm:inline">+{totalPushUps - activeUserGoals.pushUps} reps</span>
               </span>
             ) : (
-              <span className="text-slate-400">
+              <span className="text-slate-400 truncate">
                 Restam <span className="text-slate-200 font-mono font-bold">{Math.max(0, activeUserGoals.pushUps - totalPushUps)}</span> reps
               </span>
             )}
@@ -216,42 +216,42 @@ export default function PersonalDashboard({
         </div>
 
         {/* 3. Abdominais */}
-        <div className={`bg-slate-900 border rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden transition group ${
+        <div className={`bg-slate-900 border rounded-2xl p-3 sm:p-5 shadow-xl relative overflow-hidden transition group ${
           pctSitUps >= 100 ? 'border-blue-400/50 shadow-blue-500/10' : 'border-slate-800'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <span className="text-[11px] sm:text-xs font-black text-slate-300 uppercase tracking-wider truncate">
               Abdominais
             </span>
-            <span className={`text-xs font-black px-2.5 py-1 rounded-xl font-mono ${
+            <span className={`text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 rounded-xl font-mono shrink-0 ${
               pctSitUps >= 100 ? 'bg-blue-400/20 text-blue-300 border border-blue-400/40' : 'bg-slate-800 text-slate-300 border border-slate-700'
             }`}>
               {pctSitUps >= 100 ? `✓ ${pctSitUps}%` : `${pctSitUps}%`}
             </span>
           </div>
 
-          <div className="mb-3">
-            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+          <div className="mb-2 sm:mb-3">
+            <div className="text-xl sm:text-3xl font-black text-white font-mono tracking-tight">
               <span className={pctSitUps >= 100 ? 'text-blue-400' : 'text-white'}>{totalSitUps}</span>
-              <span className="text-sm sm:text-base font-semibold text-slate-400 ml-1.5">/ {activeUserGoals.sitUps}</span>
+              <span className="text-xs sm:text-base font-semibold text-slate-400 ml-1">/ {activeUserGoals.sitUps}</span>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-3">
+          <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-2 sm:mb-3">
             <div
               className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-blue-500/40"
               style={{ width: `${Math.min(100, pctSitUps)}%` }}
             ></div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-semibold pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold pt-1.5 border-t border-slate-800/80">
             {pctSitUps >= 100 ? (
-              <span className="text-blue-400 flex items-center gap-1">
-                🎉 Meta batida! <span className="text-white font-mono">+{totalSitUps - activeUserGoals.sitUps} reps</span>
+              <span className="text-blue-400 flex items-center gap-1 truncate">
+                🎉 Meta batida! <span className="text-white font-mono hidden sm:inline">+{totalSitUps - activeUserGoals.sitUps} reps</span>
               </span>
             ) : (
-              <span className="text-slate-400">
+              <span className="text-slate-400 truncate">
                 Restam <span className="text-slate-200 font-mono font-bold">{Math.max(0, activeUserGoals.sitUps - totalSitUps)}</span> reps
               </span>
             )}
@@ -259,42 +259,42 @@ export default function PersonalDashboard({
         </div>
 
         {/* 4. Corrida (KM) */}
-        <div className={`bg-slate-900 border rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden transition group ${
+        <div className={`bg-slate-900 border rounded-2xl p-3 sm:p-5 shadow-xl relative overflow-hidden transition group ${
           pctRunningKm >= 100 ? 'border-orange-400/50 shadow-orange-500/10' : 'border-slate-800'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <span className="text-[11px] sm:text-xs font-black text-slate-300 uppercase tracking-wider truncate">
               Corrida (KM)
             </span>
-            <span className={`text-xs font-black px-2.5 py-1 rounded-xl font-mono ${
+            <span className={`text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 rounded-xl font-mono shrink-0 ${
               pctRunningKm >= 100 ? 'bg-orange-400/20 text-orange-300 border border-orange-400/40' : 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
             }`}>
               {pctRunningKm >= 100 ? `✓ ${pctRunningKm}%` : `${pctRunningKm}%`}
             </span>
           </div>
 
-          <div className="mb-3">
-            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+          <div className="mb-2 sm:mb-3">
+            <div className="text-xl sm:text-3xl font-black text-white font-mono tracking-tight">
               <span className={pctRunningKm >= 100 ? 'text-orange-400' : 'text-white'}>{totalRunningKm}</span>
-              <span className="text-sm sm:text-base font-semibold text-slate-400 ml-1.5">/ {activeUserGoals.runningKm} km</span>
+              <span className="text-xs sm:text-base font-semibold text-slate-400 ml-1">/ {activeUserGoals.runningKm}k</span>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-3">
+          <div className="w-full bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 mb-2 sm:mb-3">
             <div
               className="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-orange-500/40"
               style={{ width: `${Math.min(100, pctRunningKm)}%` }}
             ></div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-semibold pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold pt-1.5 border-t border-slate-800/80">
             {pctRunningKm >= 100 ? (
-              <span className="text-orange-400 flex items-center gap-1">
-                🎉 Meta batida! <span className="text-white font-mono">+{Math.round((totalRunningKm - activeUserGoals.runningKm) * 10) / 10} km</span>
+              <span className="text-orange-400 flex items-center gap-1 truncate">
+                🎉 Meta batida! <span className="text-white font-mono hidden sm:inline">+{Math.round((totalRunningKm - activeUserGoals.runningKm) * 10) / 10} km</span>
               </span>
             ) : (
-              <span className="text-slate-400">
+              <span className="text-slate-400 truncate">
                 Restam <span className="text-slate-200 font-mono font-bold">{Math.max(0, Math.round((activeUserGoals.runningKm - totalRunningKm) * 10) / 10)}</span> km
               </span>
             )}
