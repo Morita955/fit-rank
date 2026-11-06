@@ -54,6 +54,9 @@ function MainApp() {
   useEffect(() => {
     if (user) {
       refreshData();
+      // Auto-refresh connections and workout data every 5 seconds for real-time notifications
+      const interval = setInterval(refreshData, 5000);
+      return () => clearInterval(interval);
     } else {
       setActivities([]);
       setConnections([]);
@@ -80,7 +83,7 @@ function MainApp() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white max-w-full overflow-x-hidden">
       {/* If not logged in, show Auth Modal */}
       {!user ? (
         <AuthModal isOpen={true} />
@@ -105,7 +108,7 @@ function MainApp() {
           />
 
           {/* Body Content */}
-          <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 pb-28 sm:py-6">
+          <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 pb-28 sm:py-6 overflow-x-hidden">
             {activeTab === 'dashboard' && (
               <PersonalDashboard
                 selectedMonth={selectedMonth}
@@ -139,8 +142,8 @@ function MainApp() {
           </main>
 
           {/* Footer */}
-          <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
-            <p>
+          <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 px-4">
+            <p className="max-w-2xl mx-auto leading-relaxed">
               FitRank - Acompanhamento Físico Diário & Ranking Mútuo entre Amigos. Metas: 200 Barras | 1000 Flexões | 500 Abdominais | 50 km Corrida.
             </p>
           </footer>

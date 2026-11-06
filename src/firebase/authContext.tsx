@@ -445,8 +445,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const verifyEmailCode = async (_code: string, email?: string) => {
-    if (email && user) {
+  const verifyEmailCode = async (code: string, emailStr?: string) => {
+    const targetEmail = emailStr || user?.email;
+
+    if (isSupabaseConfigured && targetEmail) {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: targetEmail,
+        token: code.trim(),
+        type: 'signup',
+      });
+
+      if (error) {
+        const { data: data2, error: error2 } = await supabase.auth.verifyOtp({
+          email: targetEmail,
+          token: code.trim(),
+          type: 'email',
+        });
+
+        if (error2) {
+          throw new Error(error.message || error2.message || 'Código de verificação incorreto ou expirado.');
+        }
+
+        if (data2.user) {
+          await loadProfileForUser(data2.user);
+        }
+      } else if (data.user) {
+        await loadProfileForUser(data.user);
+      }
+    } else {
       setUser((prev) => (prev ? { ...prev, emailVerified: true } : null));
     }
   };
